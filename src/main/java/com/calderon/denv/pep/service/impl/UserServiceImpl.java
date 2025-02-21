@@ -22,29 +22,37 @@ public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final RoleService roleService;
 
-  //  private final
-
-  @Override
-  public User save(User user) {
-    //    Optional<Role> adminRole
-    return null;
-  }
-
   @Override
   @Transactional
   public void registerUser(RegisterRequest req) {
-    validateRequest(req);
-    User user = mapRequest(req);
+    validateUserRegistrationRequest(req);
+    User user = toUser(req);
     assignRole(user, ERole.USER);
     userRepository.save(user);
   }
 
-  private void validateRequest(RegisterRequest req) {
-    validateEmail(req.getEmail());
-    validatePassword(req.getPassword());
+  private User getUser(Long id) {
+    return userRepository
+        .findById(id)
+        .orElseThrow(() -> new DataNotFoundException("Error: User not found"));
   }
 
-  private User mapRequest(RegisterRequest req) {
+  @Transactional
+  @Override
+  public void registerAdmin(Long idRequester, Long idUser) {
+    User requester = getUser(idRequester);
+    if (!requester.hasRole(ERole.ADMIN))
+      throw new DataNotFoundException("Error: Requester user is not an admin");
+    User user = getUser(idUser);
+    assignRole(user, ERole.ADMIN);
+    userRepository.save(user);
+  }
+
+  private void validateUserRegistrationRequest(RegisterRequest req) {
+    validateEmail(req.getEmail());
+  }
+
+  private User toUser(RegisterRequest req) {
     return User.builder()
         .name(req.getName())
         .lastName(req.getLastName())
@@ -58,7 +66,6 @@ public class UserServiceImpl implements UserService {
       throw new DataNotFoundException("Error: Email is already in use");
   }
 
-  private void validatePassword(String password) {}
 
   private void assignRole(User user, ERole role) {
     user.addRole(roleService.getRole(role));

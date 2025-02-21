@@ -2,13 +2,15 @@ package com.calderon.denv.pep.service;
 
 import com.calderon.denv.pep.dto.RegisterRequest;
 import com.calderon.denv.pep.model.auth.User;
-import com.calderon.denv.pep.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface UserService {
-  User save(User user);
 
   User getByEmail(String email);
+
+  @Transactional
+  void registerAdmin(Long idRequester, Long idUser);
 
   UserDetails loadUser(String email);
 

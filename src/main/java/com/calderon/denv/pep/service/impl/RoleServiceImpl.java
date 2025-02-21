@@ -16,7 +16,7 @@ public class RoleServiceImpl implements RoleService {
   @Override
   public Role getRole(ERole role) {
     return roleRepository
-        .findByName(role.withPrefix())
+        .findByName(role.prefix())
         .orElseThrow(() -> new DataNotFoundException("Error: Role is not found"));
   }
 

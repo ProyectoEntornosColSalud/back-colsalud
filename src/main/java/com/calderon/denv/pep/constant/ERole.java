@@ -6,9 +6,9 @@ import lombok.AllArgsConstructor;
 public enum ERole {
   USER("ROLE_USER"),
   ADMIN("ROLE_ADMIN");
-  private final String withPrefix;
+  private final String prefix;
 
-  public String withPrefix() {
-    return this.withPrefix;
+  public String prefix() {
+    return this.prefix;
   }
 }

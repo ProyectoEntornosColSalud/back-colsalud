@@ -1,5 +1,6 @@
 package com.calderon.denv.pep.model.auth;
 
+import com.calderon.denv.pep.constant.ERole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.util.HashSet;
@@ -41,10 +42,15 @@ public class User {
       joinColumns = @JoinColumn(name = "user_id"),
       inverseJoinColumns = @JoinColumn(name = "role_id"),
       uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role_id"}))
-  private Set<Role> roles;
+  private Set<Role> roles = new HashSet<>();
 
   public void addRole(Role role) {
     if (this.roles == null) this.roles = new HashSet<>();
     this.roles.add(role);
+  }
+
+  public boolean hasRole(ERole eRole) {
+    if (this.roles == null) return false;
+    return this.roles.stream().anyMatch(role -> role.getName().equals(eRole.prefix()));
   }
 }

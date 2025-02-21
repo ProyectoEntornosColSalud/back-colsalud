@@ -34,6 +34,13 @@ public class AuthController {
     return ResponseEntity.ok("User registered successfully");
   }
 
+  @PostMapping("/register-admin")
+  public ResponseEntity<String> registerAdmin(
+      @RequestHeader Long idRequester, @RequestParam Long idUser) {
+    userService.registerAdmin(idRequester, idUser);
+    return ResponseEntity.ok("Admin registered successfully");
+  }
+
   @GetMapping("/test")
   public ResponseEntity<String> test() {
     return ResponseEntity.ok("You are authenticated");
