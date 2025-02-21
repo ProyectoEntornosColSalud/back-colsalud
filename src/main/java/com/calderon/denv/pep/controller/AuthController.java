@@ -8,7 +8,6 @@ import com.calderon.denv.pep.service.impl.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,12 +19,8 @@ public class AuthController {
 
   @PostMapping("/login")
   public ResponseEntity<JwtResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
-    try {
-      String token = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
-      return ResponseEntity.ok(new JwtResponse(token));
-    } catch (BadCredentialsException e) {
-      return ResponseEntity.status(401).build();
-    }
+    String token = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+    return ResponseEntity.ok(new JwtResponse(token));
   }
 
   @PostMapping("/register")

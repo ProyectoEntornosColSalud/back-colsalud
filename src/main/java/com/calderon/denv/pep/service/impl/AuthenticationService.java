@@ -1,10 +1,10 @@
 package com.calderon.denv.pep.service.impl;
 
+import com.calderon.denv.pep.exception.ValidationException;
 import com.calderon.denv.pep.model.auth.User;
 import com.calderon.denv.pep.security.JwtUtil;
 import com.calderon.denv.pep.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,7 @@ public class AuthenticationService {
     User user = userService.getByEmail(email);
 
     if (!encoder.matches(password, user.getPassword()))
-      throw new BadCredentialsException("INCORRECT PASSWORD");
+      throw new ValidationException("Error: Incorrect Password");
 
     return jwtUtil.generateToken(user.getEmail());
   }
