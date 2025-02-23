@@ -1,6 +1,6 @@
-package com.calderon.denv.pep.service;
+package com.calderon.denv.pep.service.auth;
 
-import com.calderon.denv.pep.dto.RegisterRequest;
+import com.calderon.denv.pep.dto.auth.RegisterRequest;
 import com.calderon.denv.pep.model.auth.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;

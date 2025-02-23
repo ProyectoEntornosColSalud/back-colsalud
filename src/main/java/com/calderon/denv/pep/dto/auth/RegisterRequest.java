@@ -1,4 +1,4 @@
-package com.calderon.denv.pep.dto;
+package com.calderon.denv.pep.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

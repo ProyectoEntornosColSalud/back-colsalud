@@ -1,12 +1,12 @@
-package com.calderon.denv.pep.service.impl;
+package com.calderon.denv.pep.service.auth.impl;
 
 import com.calderon.denv.pep.constant.ERole;
-import com.calderon.denv.pep.dto.RegisterRequest;
+import com.calderon.denv.pep.dto.auth.RegisterRequest;
 import com.calderon.denv.pep.exception.DataNotFoundException;
 import com.calderon.denv.pep.model.auth.User;
-import com.calderon.denv.pep.repository.UserRepository;
-import com.calderon.denv.pep.service.RoleService;
-import com.calderon.denv.pep.service.UserService;
+import com.calderon.denv.pep.repository.auth.UserRepository;
+import com.calderon.denv.pep.service.auth.RoleService;
+import com.calderon.denv.pep.service.auth.UserService;
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

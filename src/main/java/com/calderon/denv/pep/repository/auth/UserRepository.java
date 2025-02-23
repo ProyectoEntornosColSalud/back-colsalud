@@ -1,4 +1,4 @@
-package com.calderon.denv.pep.repository;
+package com.calderon.denv.pep.repository.auth;
 
 import com.calderon.denv.pep.model.auth.User;
 import org.springframework.data.jpa.repository.JpaRepository;

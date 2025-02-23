@@ -1,4 +1,4 @@
-package com.calderon.denv.pep.service;
+package com.calderon.denv.pep.service.auth;
 
 import com.calderon.denv.pep.constant.ERole;
 import com.calderon.denv.pep.model.auth.Role;

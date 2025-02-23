@@ -1,10 +1,10 @@
-package com.calderon.denv.pep.service.impl;
+package com.calderon.denv.pep.service.auth.impl;
 
 import com.calderon.denv.pep.constant.ERole;
 import com.calderon.denv.pep.exception.DataNotFoundException;
 import com.calderon.denv.pep.model.auth.Role;
-import com.calderon.denv.pep.repository.RoleRepository;
-import com.calderon.denv.pep.service.RoleService;
+import com.calderon.denv.pep.repository.auth.RoleRepository;
+import com.calderon.denv.pep.service.auth.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,6 @@
 package com.calderon.denv.pep.security;
 
-import com.calderon.denv.pep.service.UserService;
+import com.calderon.denv.pep.service.auth.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

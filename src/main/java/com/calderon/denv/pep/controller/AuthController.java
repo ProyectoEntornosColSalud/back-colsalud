@@ -1,10 +1,10 @@
 package com.calderon.denv.pep.controller;
 
-import com.calderon.denv.pep.dto.JwtResponse;
-import com.calderon.denv.pep.dto.LoginRequest;
-import com.calderon.denv.pep.dto.RegisterRequest;
-import com.calderon.denv.pep.service.UserService;
-import com.calderon.denv.pep.service.impl.AuthenticationService;
+import com.calderon.denv.pep.dto.auth.JwtResponse;
+import com.calderon.denv.pep.dto.auth.LoginRequest;
+import com.calderon.denv.pep.dto.auth.RegisterRequest;
+import com.calderon.denv.pep.service.auth.UserService;
+import com.calderon.denv.pep.service.auth.impl.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

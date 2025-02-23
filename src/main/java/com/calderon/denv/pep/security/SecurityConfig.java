@@ -41,15 +41,19 @@ public class SecurityConfig {
    * includes the authentication token Defines which endpoints are public and which are protected
    * Builds the security configuration and returns it
    */
-@Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtRequestFilter jwtRequestFilter) throws Exception {
-  http.csrf(AbstractHttpConfigurer::disable)
-      .sessionManagement(
-          session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-      .authorizeHttpRequests(
-          auth -> auth.requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
-                      .anyRequest().authenticated())
-      .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-  return http.build();
-}
+  @Bean
+  public SecurityFilterChain securityFilterChain(
+      HttpSecurity http, JwtRequestFilter jwtRequestFilter) throws Exception {
+    http.csrf(AbstractHttpConfigurer::disable)
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(
+            auth ->
+                auth.requestMatchers("/api/auth/**", "/api/pricing/plans")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+    return http.build();
+  }
 }
