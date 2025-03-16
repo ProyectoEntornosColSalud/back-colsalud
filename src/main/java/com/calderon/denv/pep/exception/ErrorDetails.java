@@ -2,9 +2,10 @@ package com.calderon.denv.pep.exception;
 
 import java.time.LocalDateTime;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ErrorDetails {

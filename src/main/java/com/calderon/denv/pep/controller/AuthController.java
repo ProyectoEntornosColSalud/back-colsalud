@@ -1,8 +1,8 @@
 package com.calderon.denv.pep.controller;
 
+import com.calderon.denv.pep.dto.app.RegisterUserRequest;
 import com.calderon.denv.pep.dto.auth.JwtResponse;
 import com.calderon.denv.pep.dto.auth.LoginRequest;
-import com.calderon.denv.pep.dto.auth.RegisterRequest;
 import com.calderon.denv.pep.service.auth.UserService;
 import com.calderon.denv.pep.service.auth.impl.AuthenticationService;
 import jakarta.validation.Valid;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
   private final AuthenticationService authService;
   private final UserService userService;
-
   @PostMapping("/login")
   public ResponseEntity<JwtResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
     String token = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
@@ -24,16 +23,9 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest req) {
-    userService.registerUser(req);
-    return ResponseEntity.ok("User registered successfully");
-  }
-
-  @PostMapping("/register-admin")
-  public ResponseEntity<String> registerAdmin(
-      @RequestHeader Long idRequester, @RequestParam Long idUser) {
-    userService.registerAdmin(idRequester, idUser);
-    return ResponseEntity.ok("Admin registered successfully");
+  public ResponseEntity<JwtResponse> register(@RequestBody @Valid RegisterUserRequest request) {
+    String token = userService.registerUser(request);
+    return ResponseEntity.ok(new JwtResponse(token));
   }
 
   @GetMapping("/test")

@@ -20,6 +20,6 @@ public class AuthenticationService {
     if (!encoder.matches(password, user.getPassword()))
       throw new BadRequestException("Error: Incorrect Password");
 
-    return jwtUtil.generateToken(user.getEmail());
+    return jwtUtil.generateToken(user.getUsername());
   }
 }

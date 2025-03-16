@@ -1,10 +1,9 @@
 package com.calderon.denv.pep.model.auth;
 
-import com.calderon.denv.pep.constant.ERole;
+import com.calderon.denv.pep.constant.Role;
+import com.calderon.denv.pep.model.app.Person;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.*;
 
 @Getter
@@ -13,44 +12,24 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "USERS", schema = "AUTH")
+@Table(name = "USERS", schema = "auth")
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NotBlank
-  @Column(nullable = false, length = 100)
-  private String name;
-
-  @NotBlank
-  @Column(name = "last_name", nullable = false, length = 100)
-  private String lastName;
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "id_person")
+  private Person person;
 
   @NotBlank
   @Column(nullable = false, unique = true, length = 100)
-  private String email;
+  private String username;
 
   @NotBlank
   @Column(nullable = false)
   private String password;
 
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(
-      name = "users_roles",
-      schema = "auth",
-      joinColumns = @JoinColumn(name = "user_id"),
-      inverseJoinColumns = @JoinColumn(name = "role_id"),
-      uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role_id"}))
-  private Set<Role> roles = new HashSet<>();
-
-  public void addRole(Role role) {
-    if (this.roles == null) this.roles = new HashSet<>();
-    this.roles.add(role);
-  }
-
-  public boolean hasRole(ERole eRole) {
-    if (this.roles == null) return false;
-    return this.roles.stream().anyMatch(role -> role.getName().equals(eRole.prefix()));
-  }
+  @Enumerated(EnumType.STRING)
+  private Role role;
 }

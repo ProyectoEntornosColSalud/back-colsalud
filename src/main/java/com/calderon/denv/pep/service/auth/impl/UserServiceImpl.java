@@ -1,11 +1,14 @@
 package com.calderon.denv.pep.service.auth.impl;
 
-import com.calderon.denv.pep.constant.ERole;
-import com.calderon.denv.pep.dto.auth.RegisterRequest;
+import com.calderon.denv.pep.constant.Role;
+import com.calderon.denv.pep.dto.app.RegisterUserRequest;
 import com.calderon.denv.pep.exception.DataNotFoundException;
+import com.calderon.denv.pep.exception.ValidationException;
+import com.calderon.denv.pep.model.app.Person;
 import com.calderon.denv.pep.model.auth.User;
+import com.calderon.denv.pep.repository.app.PersonRepository;
 import com.calderon.denv.pep.repository.auth.UserRepository;
-import com.calderon.denv.pep.service.auth.RoleService;
+import com.calderon.denv.pep.security.JwtUtil;
 import com.calderon.denv.pep.service.auth.UserService;
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
@@ -17,69 +20,64 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
-
   private final PasswordEncoder encoder;
   private final UserRepository userRepository;
-  private final RoleService roleService;
+  private final PersonRepository personRepository;
+  private final JwtUtil jwtUtil;
 
   @Override
   @Transactional
-  public void registerUser(RegisterRequest req) {
-    validateUserRegistrationRequest(req);
-    User user = toUser(req);
-    assignRole(user, ERole.USER);
-    userRepository.save(user);
+  public String registerUser(RegisterUserRequest request) {
+    validateUserRegistrationRequest(request);
+    Person person = personRepository.save(mapRequestToPerson(request));
+    userRepository.save(
+        User.builder()
+            .person(person)
+            .username(request.getDocumentNumber())
+            .password(encoder.encode(request.getPassword()))
+            .role(Role.USER)
+            .build());
+    return jwtUtil.generateToken(person.getDocumentNumber());
   }
 
-  private User getUser(Long id) {
-    return userRepository
-        .findById(id)
-        .orElseThrow(() -> new DataNotFoundException("Error: User not found"));
-  }
-
-  @Transactional
-  @Override
-  public void registerAdmin(Long idRequester, Long idUser) {
-    User requester = getUser(idRequester);
-    if (!requester.hasRole(ERole.ADMIN))
-      throw new DataNotFoundException("Error: Requester user is not an admin");
-    User user = getUser(idUser);
-    assignRole(user, ERole.ADMIN);
-    userRepository.save(user);
-  }
-
-  private void validateUserRegistrationRequest(RegisterRequest req) {
-    validateEmail(req.getEmail());
-  }
-
-  private User toUser(RegisterRequest req) {
-    return User.builder()
-        .name(req.getName())
-        .lastName(req.getLastName())
-        .email(req.getEmail())
-        .password(encoder.encode(req.getPassword()))
+  private static Person mapRequestToPerson(RegisterUserRequest request) {
+    return Person.builder()
+        .name(request.getName())
+        .lastName(request.getLastName())
+        .birthDate(request.getBirthDate())
+        .gender(request.getGender())
+        .documentType(request.getDocumentType())
+        .documentNumber(request.getDocumentNumber())
+        .phone(request.getPhone())
+        .email(request.getEmail())
         .build();
   }
 
-  private void validateEmail(String email) {
-    if (userRepository.existsByEmail(email))
-      throw new DataNotFoundException("Error: Email is already in use");
+  private void validateUserRegistrationRequest(RegisterUserRequest request) {
+    validateEmail(request.getEmail());
+    validateDocument(request);
   }
 
+  private void validateDocument(RegisterUserRequest request) {
+    if (personRepository.existsByDocumentTypeAndDocumentNumber(
+        request.getDocumentType(), request.getDocumentNumber()))
+      throw new ValidationException("Error: Document is already in use");
+  }
 
-  private void assignRole(User user, ERole role) {
-    user.addRole(roleService.getRole(role));
+  private void validateEmail(String email) {
+    if (personRepository.existsByEmail(email))
+      throw new ValidationException("Error: Email is already in use");
   }
 
   @Override
   public UserDetails loadUser(String email) {
     User user = getByEmail(email);
     return new org.springframework.security.core.userdetails.User(
-        user.getEmail(), user.getPassword(), new ArrayList<>());
+        user.getUsername(), user.getPassword(), new ArrayList<>());
   }
 
   @Override
   public User getByEmail(String email) {
-    return userRepository.findByEmail(email).orElseThrow(DataNotFoundException::new);
+    return userRepository.findByUsername(email).orElseThrow(DataNotFoundException::new);
   }
 }
