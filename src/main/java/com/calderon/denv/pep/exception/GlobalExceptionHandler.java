@@ -24,12 +24,20 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  @ExceptionHandler({DataNotFoundException.class, BadCredentialsException.class})
+  @ExceptionHandler({DataNotFoundException.class})
   public ResponseEntity<ErrorDetails> handleResourceNotFoundException(
       DataNotFoundException ex, WebRequest request) {
     ErrorDetails errorDetails =
         new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
     return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler({BadCredentialsException.class})
+  public ResponseEntity<ErrorDetails> handleBadCredentialsException(
+      BadCredentialsException ex, WebRequest request) {
+    ErrorDetails errorDetails =
+        new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+    return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
