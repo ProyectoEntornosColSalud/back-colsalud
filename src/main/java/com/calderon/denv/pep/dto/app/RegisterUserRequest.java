@@ -1,7 +1,6 @@
 package com.calderon.denv.pep.dto.app;
 
 import com.calderon.denv.pep.constant.DocumentType;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -15,9 +14,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterUserRequest {
-
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private Long id;
 
   @NotBlank String name;
 
@@ -41,6 +37,8 @@ public class RegisterUserRequest {
   String documentNumber;
 
   @Email @NotBlank String email;
+
   @NotBlank String password;
+  
   @NotBlank String phone;
 }

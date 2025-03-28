@@ -12,10 +12,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "USERS", schema = "auth")
+@Table(name = "user", schema = "app")
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "user_id")
   private Long id;
 
   @OneToOne(cascade = CascadeType.ALL)
@@ -31,5 +32,6 @@ public class User {
   private String password;
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "role", nullable = false, length = 10)
   private Role role;
 }

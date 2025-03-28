@@ -43,8 +43,8 @@ public class UserServiceImpl implements UserService {
   private static Person mapRequestToPerson(RegisterUserRequest request) {
     return Person.builder()
         .name(request.getName())
-        .lastName(request.getLastName())
-        .birthDate(request.getBirthDate())
+        .lastname(request.getLastName())
+        .birthday(request.getBirthDate())
         .gender(request.getGender())
         .documentType(request.getDocumentType())
         .documentNumber(request.getDocumentNumber())

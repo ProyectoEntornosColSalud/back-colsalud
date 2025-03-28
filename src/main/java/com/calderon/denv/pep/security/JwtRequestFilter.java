@@ -38,8 +38,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       }
     }
 
-    // If the token is valid and has not previously authenticated, we proceed to load the user
-    // details
+    // If the token is valid and has not previously authenticated, we proceed to load the user details
     if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
       var userDetails = userService.loadUser(username);
       if (jwtUtil.isTokenValid(jwt, userDetails.getUsername())) {

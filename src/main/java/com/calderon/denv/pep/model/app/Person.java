@@ -14,10 +14,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "persons", schema = "app")
+@Table(name = "person", schema = "app")
 public class Person {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "person_id")
   private Long id;
 
   @NotBlank
@@ -25,8 +26,8 @@ public class Person {
   private String name;
 
   @NotBlank
-  @Column(name = "last_name", nullable = false)
-  private String lastName;
+  @Column(name = "lastname", nullable = false)
+  private String lastname;
 
   @NotBlank
   @Column(name = "gender", nullable = false)
@@ -34,8 +35,8 @@ public class Person {
 
   @NotNull
   @Temporal(TemporalType.DATE)
-  @Column(name = "birth_date", nullable = false)
-  private LocalDate birthDate;
+  @Column(name = "birthday", nullable = false)
+  private LocalDate birthday;
 
   @NotNull
   @Column(name = "document_type", nullable = false, length = 4)
