@@ -1,7 +1,7 @@
 package com.calderon.denv.pep.constant;
 
 public enum Role {
-  USER,
-  PROVIDER,
-  ADMIN
+  ROLE_USER,
+  ROLE_PROVIDER,
+  ROLE_ADMIN
 }

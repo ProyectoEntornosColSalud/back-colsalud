@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
             .person(person)
             .username(request.getDocumentNumber())
             .password(encoder.encode(request.getPassword()))
-            .role(Role.USER)
+            .role(Role.ROLE_USER)
             .build());
     return jwtUtil.generateToken(person.getDocumentNumber());
   }
@@ -80,6 +80,6 @@ public class UserServiceImpl implements UserService {
   public User getByEmail(String email) {
     return userRepository
         .findByUsername(email)
-        .orElseThrow(() -> new DataNotFoundException("Error: User not found"));
+            .orElse(null);
   }
 }
