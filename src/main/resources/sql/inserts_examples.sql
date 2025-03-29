@@ -1,11 +1,11 @@
 -- Insertar personas (paciente y doctor)
 INSERT INTO person (name, lastname, gender, birthday, document_type, document_number, email, phone)
 VALUES
-('Juan', 'Perez', 'Male', '1985-05-20', 'DNI', '12345678', 'juan.perez@mail.com', '555-1234');
+('Juan', 'Perez', 'Male', '1985-05-20', 'CC', '12345678', 'juan.perez@mail.com', '555-1234');
 
 INSERT INTO person (name, lastname, gender, birthday, document_type, document_number, email, phone)
 VALUES
-('Ana', 'Gomez', 'Female', '1978-10-12', 'DNI', '87654321', 'ana.gomez@mail.com', '555-5678');
+('Ana', 'Gomez', 'Female', '1978-10-12', 'CC', '87654321', 'ana.gomez@mail.com', '555-5678');
 
 -- Insertar usuarios
 INSERT INTO "user" (username, password, id_person)

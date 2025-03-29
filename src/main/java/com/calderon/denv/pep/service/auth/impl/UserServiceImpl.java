@@ -71,13 +71,13 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserDetails loadUser(String email) {
-    User user = getByEmail(email);
+    User user = getByUsername(email);
     return new org.springframework.security.core.userdetails.User(
         user.getUsername(), user.getPassword(), new ArrayList<>());
   }
 
   @Override
-  public User getByEmail(String email) {
+  public User getByUsername(String email) {
     return userRepository
         .findByUsername(email)
             .orElse(null);

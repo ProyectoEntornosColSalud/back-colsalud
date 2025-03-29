@@ -18,16 +18,16 @@ public class AuthController {
   private final AuthenticationService authService;
   private final UserService userService;
 
-
   @PostMapping("/login")
-  public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
+  public ResponseEntity<Void> login(
+      @RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
     String token = authService.authenticate(loginRequest.getUsername(), loginRequest.getPassword());
 
     Cookie cookie = new Cookie("colsalud_token", token);
-    cookie.setHttpOnly(true); // 🔒 No accesible desde JavaScript
-    //cookie.setSecure(true); // 🔐 Solo en HTTPS (desactivar en desarrollo)
-    cookie.setPath("/"); // 📌 Disponible para toda la aplicación
-    cookie.setMaxAge(3600*8); // ⏳ Expira en 1 hora
+    cookie.setHttpOnly(true);
+    // cookie.setSecure(true); // Solo en HTTPS (desactivar en desarrollo)
+    cookie.setPath("/");
+    cookie.setMaxAge(3600 * 8);
 
     response.addCookie(cookie);
     return ResponseEntity.ok().build();
@@ -40,7 +40,7 @@ public class AuthController {
 //    cookie.setHttpOnly(true);
 //    cookie.setSecure(true);
 //    cookie.setPath("/");
-//    cookie.setMaxAge(0); // 🔥 Expira inmediatamente
+//    cookie.setMaxAge(0);
 //
 //    response.addCookie(cookie);
 //    return ResponseEntity.ok("Logout exitoso, cookie eliminada.");

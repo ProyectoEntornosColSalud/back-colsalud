@@ -22,7 +22,7 @@ public class AuthenticationService {
   public String authenticate(String email, String password) {
 
 
-    User user = userService.getByEmail(email);
+    User user = userService.getByUsername(email);
     if (Objects.isNull(user) || !encoder.matches(password, user.getPassword()))
       throw new BadCredentialsException("Error: Incorrect credentials");
 
