@@ -2,7 +2,6 @@ package com.calderon.denv.pep.service.auth.impl;
 
 import com.calderon.denv.pep.constant.Role;
 import com.calderon.denv.pep.dto.app.RegisterUserRequest;
-import com.calderon.denv.pep.exception.DataNotFoundException;
 import com.calderon.denv.pep.exception.ValidationException;
 import com.calderon.denv.pep.model.app.Person;
 import com.calderon.denv.pep.model.auth.User;

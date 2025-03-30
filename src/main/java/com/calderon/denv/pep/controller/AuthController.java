@@ -33,18 +33,17 @@ public class AuthController {
     return ResponseEntity.ok().build();
   }
 
-//  @GetMapping("/logout")
-//  public ResponseEntity<?> logout(HttpServletResponse response) {
-//    // Invalidar la cookie estableciendo una fecha de expiración negativa
-//    Cookie cookie = new Cookie("token", null);
-//    cookie.setHttpOnly(true);
-//    cookie.setSecure(true);
-//    cookie.setPath("/");
-//    cookie.setMaxAge(0);
-//
-//    response.addCookie(cookie);
-//    return ResponseEntity.ok("Logout exitoso, cookie eliminada.");
-//  }
+    @GetMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+      Cookie cookie = new Cookie("colsalud_token", null);
+      cookie.setHttpOnly(true);
+      cookie.setSecure(true);
+      cookie.setPath("/");
+      cookie.setMaxAge(0);
+
+      response.addCookie(cookie);
+      return ResponseEntity.ok().build();
+    }
 
   @PostMapping("/register")
   public ResponseEntity<Void> register(@RequestBody @Valid RegisterUserRequest request) {

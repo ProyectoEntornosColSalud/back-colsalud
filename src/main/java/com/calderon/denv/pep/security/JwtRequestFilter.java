@@ -32,7 +32,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     if (authHeader != null && authHeader.startsWith("Bearer ")) {
       jwt = authHeader.substring(7);
       try {
-        username = jwtUtil.extractEmail(jwt);
+        username = jwtUtil.extractUsername(jwt);
       } catch (Exception e) {
         logger.error("Token JWT inválido o no se pudo extraer el email.", e);
       }
