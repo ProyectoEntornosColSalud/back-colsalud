@@ -7,14 +7,17 @@ import com.calderon.denv.pep.model.app.Person;
 import com.calderon.denv.pep.model.auth.User;
 import com.calderon.denv.pep.repository.app.PersonRepository;
 import com.calderon.denv.pep.repository.auth.UserRepository;
-import com.calderon.denv.pep.security.JwtUtil;
 import com.calderon.denv.pep.service.auth.UserService;
 import java.util.ArrayList;
+
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.util.Objects.requireNonNull;
 
 @RequiredArgsConstructor
 @Service
@@ -22,34 +25,33 @@ public class UserServiceImpl implements UserService {
   private final PasswordEncoder encoder;
   private final UserRepository userRepository;
   private final PersonRepository personRepository;
-  private final JwtUtil jwtUtil;
 
   @Override
   @Transactional
-  public String registerUser(RegisterUserRequest request) {
+  public User save(RegisterUserRequest request) {
     validateUserRegistrationRequest(request);
-    Person person = personRepository.save(mapRequestToPerson(request));
-    userRepository.save(
+    Person person = savePersonInfo(request);
+    return userRepository.save(
         User.builder()
             .person(person)
-            .username(request.getDocumentNumber())
+            .username(request.getEmail())
             .password(encoder.encode(request.getPassword()))
             .role(Role.ROLE_USER)
             .build());
-    return jwtUtil.generateToken(person.getDocumentNumber());
   }
 
-  private static Person mapRequestToPerson(RegisterUserRequest request) {
-    return Person.builder()
-        .name(request.getName())
-        .lastname(request.getLastName())
-        .birthday(request.getBirthDate())
-        .gender(request.getGender())
-        .documentType(request.getDocumentType())
-        .documentNumber(request.getDocumentNumber())
-        .phone(request.getPhone())
-        .email(request.getEmail())
-        .build();
+  private Person savePersonInfo(RegisterUserRequest dto) {
+    return personRepository.save(
+        Person.builder()
+            .name(dto.getName())
+            .lastname(dto.getLastName())
+            .birthday(dto.getBirthDate())
+            .gender(dto.getGender())
+            .documentType(dto.getDocumentType())
+            .documentNumber(dto.getDocumentNumber())
+            .phone(dto.getPhone())
+            .email(dto.getEmail())
+            .build());
   }
 
   private void validateUserRegistrationRequest(RegisterUserRequest request) {
@@ -70,15 +72,13 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserDetails loadUser(String email) {
-    User user = getByUsername(email);
+    User user = requireNonNull(getByUsername(email));
     return new org.springframework.security.core.userdetails.User(
         user.getUsername(), user.getPassword(), new ArrayList<>());
   }
 
   @Override
-  public User getByUsername(String email) {
-    return userRepository
-        .findByUsername(email)
-            .orElse(null);
+  public @Nullable User getByUsername(String email) {
+    return userRepository.findByUsername(email).orElse(null);
   }
 }

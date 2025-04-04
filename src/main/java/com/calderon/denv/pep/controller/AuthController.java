@@ -1,8 +1,10 @@
 package com.calderon.denv.pep.controller;
 
+import static com.calderon.denv.pep.constant.Constant.TOKEN_COOKIE_NAME;
+import static com.calderon.denv.pep.constant.Constant.TOKEN_EXPIRATION_TIME;
+
 import com.calderon.denv.pep.dto.app.RegisterUserRequest;
 import com.calderon.denv.pep.dto.auth.LoginRequest;
-import com.calderon.denv.pep.service.auth.UserService;
 import com.calderon.denv.pep.service.auth.impl.AuthenticationService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,38 +18,46 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
   private final AuthenticationService authService;
-  private final UserService userService;
 
   @PostMapping("/login")
   public ResponseEntity<Void> login(
       @RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
-    String token = authService.authenticate(loginRequest.getUsername(), loginRequest.getPassword());
+    String token = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
 
-    Cookie cookie = new Cookie("colsalud_token", token);
+    Cookie cookie = new Cookie(TOKEN_COOKIE_NAME, token);
     cookie.setHttpOnly(true);
     // cookie.setSecure(true); // Solo en HTTPS (desactivar en desarrollo)
     cookie.setPath("/");
-    cookie.setMaxAge(3600 * 8);
+    cookie.setMaxAge(TOKEN_EXPIRATION_TIME);
 
     response.addCookie(cookie);
     return ResponseEntity.ok().build();
   }
 
-    @GetMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
-      Cookie cookie = new Cookie("colsalud_token", null);
-      cookie.setHttpOnly(true);
-      cookie.setSecure(true);
-      cookie.setPath("/");
-      cookie.setMaxAge(0);
+  @GetMapping("/logout")
+  public ResponseEntity<Void> logout(HttpServletResponse response) {
+    Cookie cookie = new Cookie(TOKEN_COOKIE_NAME, null);
+    cookie.setHttpOnly(true);
+    cookie.setSecure(true);
+    cookie.setPath("/");
+    cookie.setMaxAge(0);
 
-      response.addCookie(cookie);
-      return ResponseEntity.ok().build();
-    }
+    response.addCookie(cookie);
+    return ResponseEntity.ok().build();
+  }
 
   @PostMapping("/register")
-  public ResponseEntity<Void> register(@RequestBody @Valid RegisterUserRequest request) {
-    String token = userService.registerUser(request);
-    return ResponseEntity.ok().header("Authorization", "Bearer " + token).build();
+  public ResponseEntity<Void> register(
+      @RequestBody @Valid RegisterUserRequest request, HttpServletResponse response) {
+    String token = authService.register(request);
+
+    Cookie cookie = new Cookie(TOKEN_COOKIE_NAME, token);
+    cookie.setHttpOnly(true);
+    // cookie.setSecure(true); // Solo en HTTPS (desactivar en desarrollo)
+    cookie.setPath("/");
+    cookie.setMaxAge(TOKEN_EXPIRATION_TIME);
+
+    response.addCookie(cookie);
+    return ResponseEntity.ok().build();
   }
 }

@@ -8,7 +8,7 @@ VALUES
 
 INSERT INTO "user" (username, password, id_person)
 VALUES
-('12345678', '$2a$12$ZahQSG4JPZzpeNapI3/61OuOHq2BoLYhWGC9quB6R0sQW4e67lxpu', 1),
+('12345678', '$2a$12$ZahQSG4JPZzpeNapI3/61OuOHq2BoLYhWGC9quB6R0sQW4e67lxpu', 1), -- Hola123
 ('87654321', '$2a$12$ZahQSG4JPZzpeNapI3/61OuOHq2BoLYhWGC9quB6R0sQW4e67lxpu', 2);
 
 INSERT INTO doctor (person_id, license_number)

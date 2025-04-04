@@ -2,9 +2,11 @@ package com.calderon.denv.pep.service.auth.impl;
 
 import static java.util.Objects.isNull;
 
+import com.calderon.denv.pep.dto.app.RegisterUserRequest;
 import com.calderon.denv.pep.model.auth.User;
 import com.calderon.denv.pep.security.JwtUtil;
 import com.calderon.denv.pep.service.auth.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,11 +19,15 @@ public class AuthenticationService {
   private final JwtUtil jwtUtil;
   private final PasswordEncoder encoder;
 
-  public String authenticate(String email, String password) {
-
-    User user = userService.getByUsername(email);
+  public String login(String username, String password) {
+    User user = userService.getByUsername(username);
     if (isNull(user) || !encoder.matches(password, user.getPassword()))
       throw new BadCredentialsException("Error: Incorrect credentials");
+    return jwtUtil.generateToken(user.getUsername());
+  }
+
+  public String register(@Valid RegisterUserRequest request) {
+    User user = userService.save(request);
     return jwtUtil.generateToken(user.getUsername());
   }
 }
