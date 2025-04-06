@@ -26,21 +26,21 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     final String authHeader = request.getHeader("Authorization");
-    String username = null;
+    String userId = null;
     String jwt = null;
 
     if (authHeader != null && authHeader.startsWith("Bearer ")) {
       jwt = authHeader.substring(7);
       try {
-        username = jwtUtil.extractEmail(jwt);
+        userId = jwtUtil.extractSubject(jwt);
       } catch (Exception e) {
-        logger.error("Token JWT inválido o no se pudo extraer el email.", e);
+        logger.error("Token JWT inválido o no se pudo extraer el email");
       }
     }
 
     // If the token is valid and has not previously authenticated, we proceed to load the user details
-    if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      var userDetails = userService.loadUser(username);
+    if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+      var userDetails = userService.loadUser(Long.valueOf(userId));
       if (jwtUtil.isTokenValid(jwt, userDetails.getUsername())) {
         UsernamePasswordAuthenticationToken token =
             new UsernamePasswordAuthenticationToken(

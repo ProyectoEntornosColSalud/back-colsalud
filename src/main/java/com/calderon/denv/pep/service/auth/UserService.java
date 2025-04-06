@@ -2,13 +2,18 @@ package com.calderon.denv.pep.service.auth;
 
 import com.calderon.denv.pep.dto.app.RegisterUserRequest;
 import com.calderon.denv.pep.model.auth.User;
+import jakarta.annotation.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserService {
 
-  User getByEmail(String email);
+  @Nullable
+  User getUserById(Long userId);
 
-  UserDetails loadUser(String email);
+  @Nullable
+  User getByUsername(String email);
 
-  String registerUser(RegisterUserRequest request);
+  UserDetails loadUser(Long userId);
+
+  User save(RegisterUserRequest dto);
 }

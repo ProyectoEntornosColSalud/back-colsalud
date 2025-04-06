@@ -1,5 +1,7 @@
 package com.calderon.denv.pep.security;
 
+import static com.calderon.denv.pep.constant.Constant.TOKEN_EXPIRATION_TIME;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -19,20 +21,25 @@ public class JwtUtil {
     return Keys.hmacShaKeyFor(secret.getBytes());
   }
 
-  // generates a token based on the email
-  public String generateToken(String email) {
-    final long hours = 24;
+  /** Generates a JWT token with the userId as the subject */
+  public String generateToken(Long userId) {
     return Jwts.builder()
-        .subject(email)
+        .subject(String.valueOf(userId))
         .issuedAt(new Date())
-        .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * hours))
+        .expiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
         .signWith(getSigningKey())
         .compact();
   }
 
-  // extracts the email from the token
-  public String extractEmail(String token) {
+  /** Subject is the userId */
+  public String extractSubject(String token) {
     return extractClaim(token, Claims::getSubject);
+  }
+
+  public Long extractUserId(String token) {
+    final String authPrefix = "Bearer ";
+    if (token.startsWith(authPrefix)) token = token.substring(authPrefix.length());
+    return Long.valueOf(extractSubject(token));
   }
 
   public <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
@@ -44,10 +51,9 @@ public class JwtUtil {
     return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
   }
 
-  // checks if the token is valid
-  public boolean isTokenValid(String token, String userEmail) {
-    final String extractedEmail = extractEmail(token);
-    return extractedEmail.equals(userEmail) && !isTokenExpired(token);
+  public boolean isTokenValid(String token, String userId) {
+    final String extractedUserId = extractSubject(token);
+    return extractedUserId.equals(userId) && !isTokenExpired(token);
   }
 
   public boolean isTokenExpired(String token) {
