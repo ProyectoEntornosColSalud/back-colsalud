@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public @Nullable User getByUsername(String email) {
-    return userRepository.findByUsername(email).orElse(null);
+  public @Nullable User getByUsername(String document) {
+    return userRepository.findByUsername(document).orElse(null);
   }
 }
