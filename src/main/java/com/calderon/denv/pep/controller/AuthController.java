@@ -6,16 +6,20 @@ import static com.calderon.denv.pep.constant.Constant.TOKEN_EXPIRATION_TIME;
 import com.calderon.denv.pep.dto.app.RegisterUserRequest;
 import com.calderon.denv.pep.dto.auth.LoginRequest;
 import com.calderon.denv.pep.service.auth.impl.AuthenticationService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Validated
+@Tag(name = "Authentication", description = "User authentication and registration")
 public class AuthController {
   private final AuthenticationService authService;
 

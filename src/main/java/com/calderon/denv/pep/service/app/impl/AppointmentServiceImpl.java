@@ -5,14 +5,16 @@ import static com.calderon.denv.pep.constant.Constant.START_WORK_HOUR;
 import static com.calderon.denv.pep.util.Tools.parseDate;
 import static java.util.Objects.requireNonNull;
 
-import com.calderon.denv.pep.dto.app.AvailableDoctorResponse;
+import com.calderon.denv.pep.dto.ListItem;
 import com.calderon.denv.pep.dto.app.DateFilter;
 import com.calderon.denv.pep.model.app.Appointment;
 import com.calderon.denv.pep.model.app.Doctor;
 import com.calderon.denv.pep.model.app.Person;
+import com.calderon.denv.pep.model.app.Specialty;
 import com.calderon.denv.pep.model.auth.User;
 import com.calderon.denv.pep.repository.app.AppointmentRepository;
 import com.calderon.denv.pep.repository.app.DoctorRepository;
+import com.calderon.denv.pep.repository.app.SpecialtyRepository;
 import com.calderon.denv.pep.service.app.AppointmentService;
 import com.calderon.denv.pep.service.auth.UserService;
 import java.time.LocalDate;
@@ -33,22 +35,29 @@ public class AppointmentServiceImpl implements AppointmentService {
   private final DoctorRepository doctorRepository;
   private final AppointmentRepository appointmentRepository;
   private final UserService userService;
+  private final SpecialtyRepository specialtyRepository;
 
   @Override
   public void schedule(Appointment appointment) {}
 
   @Override
-  public List<AvailableDoctorResponse> getDoctorsBySpecialty(Long specialtyId) {
+  public List<ListItem> getSpecialties() {
+    return specialtyRepository.findAllActive().stream().map(this::mapSpecialtyResponse).toList();
+  }
+
+  @Override
+  public List<ListItem> getDoctorsBySpecialty(Long specialtyId) {
     return doctorRepository.findBySpecialtyId(specialtyId).stream()
         .map(this::mapDoctorResponse)
         .toList();
   }
 
-  private AvailableDoctorResponse mapDoctorResponse(Doctor doctor) {
-    return AvailableDoctorResponse.builder()
-        .doctorId(doctor.getId())
-        .doctorName(formatPersonName(doctor.getPerson()))
-        .build();
+  private ListItem mapDoctorResponse(Doctor doctor) {
+    return new ListItem(doctor.getId(), formatPersonName(doctor.getPerson()));
+  }
+
+  private ListItem mapSpecialtyResponse(Specialty specialty) {
+    return new ListItem(specialty.getId(), specialty.getName());
   }
 
   private static String formatPersonName(Person person) {

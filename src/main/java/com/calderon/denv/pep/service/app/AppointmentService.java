@@ -1,6 +1,6 @@
 package com.calderon.denv.pep.service.app;
 
-import com.calderon.denv.pep.dto.app.AvailableDoctorResponse;
+import com.calderon.denv.pep.dto.ListItem;
 import com.calderon.denv.pep.dto.app.DateFilter;
 import com.calderon.denv.pep.model.app.Appointment;
 import java.time.LocalDate;
@@ -10,7 +10,9 @@ import java.util.List;
 public interface AppointmentService {
   void schedule(Appointment appointment);
 
-  List<AvailableDoctorResponse> getDoctorsBySpecialty(Long specialtyId);
+  List<ListItem> getDoctorsBySpecialty(Long specialtyId);
+
+  List<ListItem> getSpecialties();
 
   /**
    * Returns a list of available dates for a doctor based on the provided filter. If the filter has

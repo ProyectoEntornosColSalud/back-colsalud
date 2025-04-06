@@ -49,7 +49,12 @@ public class SecurityConfig {
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/api/auth/**", "/api/user/register")
+                auth.requestMatchers(
+                        "/api/auth/**",
+                        "/api/user/register",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/bus/v3/api-docs/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
