@@ -1,5 +1,7 @@
 package com.calderon.denv.pep.service.auth.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import com.calderon.denv.pep.constant.Role;
 import com.calderon.denv.pep.dto.app.RegisterUserRequest;
 import com.calderon.denv.pep.exception.ValidationException;
@@ -8,16 +10,13 @@ import com.calderon.denv.pep.model.auth.User;
 import com.calderon.denv.pep.repository.app.PersonRepository;
 import com.calderon.denv.pep.repository.auth.UserRepository;
 import com.calderon.denv.pep.service.auth.UserService;
-import java.util.ArrayList;
-
 import jakarta.annotation.Nullable;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static java.util.Objects.requireNonNull;
 
 @RequiredArgsConstructor
 @Service
@@ -71,10 +70,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserDetails loadUser(String email) {
-    User user = requireNonNull(getByUsername(email));
+  public UserDetails loadUser(Long userId) {
+    User user = requireNonNull(getUserById(userId));
     return new org.springframework.security.core.userdetails.User(
-        user.getUsername(), user.getPassword(), new ArrayList<>());
+        user.getId().toString(), user.getPassword(), new ArrayList<>());
+  }
+
+  @Nullable
+  @Override
+  public User getUserById(Long userId) {
+    return userRepository.findById(userId).orElse(null);
   }
 
   @Override

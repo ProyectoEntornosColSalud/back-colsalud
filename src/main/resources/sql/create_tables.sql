@@ -18,8 +18,7 @@ CREATE TABLE person
     phone           VARCHAR(20),
 
     CONSTRAINT unique_document UNIQUE (document_type, document_number),
-    CONSTRAINT unique_email UNIQUE (email),
-    CONSTRAINT unique_phone UNIQUE (phone)
+    CONSTRAINT unique_email UNIQUE (email)
 );
 
 CREATE TABLE "user"
@@ -59,6 +58,5 @@ CREATE TABLE appointment
     person_id      INTEGER   NOT NULL REFERENCES person (person_id),
     doctor_id      INTEGER   NOT NULL REFERENCES doctor (doctor_id),
     specialty_id   INTEGER   NOT NULL REFERENCES specialty (specialty_id),
-    start_time     TIMESTAMP NOT NULL,
-    end_time       TIMESTAMP NOT NULL
+    start_time     TIMESTAMP NOT NULL
 );

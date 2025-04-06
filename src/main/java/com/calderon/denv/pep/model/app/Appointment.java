@@ -1,9 +1,8 @@
 package com.calderon.denv.pep.model.app;
 
-import lombok.*;
 import jakarta.persistence.*;
-
-import java.util.Date;
+import java.time.LocalDateTime;
+import lombok.*;
 
 @Getter
 @Setter
@@ -29,11 +28,8 @@ public class Appointment {
 	@ManyToOne
 	@JoinColumn(name = "specialty_id")
 	private Specialty specialty;
-	
-	@Column(name = "start_time", nullable = false)
-	private Date startTime;
 
-	@Column(name = "end_time", nullable = false)
-	private Date endTime;
+  @Column(name = "start_time", nullable = false)
+  private LocalDateTime startTime;
 
 }

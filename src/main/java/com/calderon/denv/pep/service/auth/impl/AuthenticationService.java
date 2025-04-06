@@ -23,11 +23,11 @@ public class AuthenticationService {
     User user = userService.getByUsername(username);
     if (isNull(user) || !encoder.matches(password, user.getPassword()))
       throw new BadCredentialsException("Error: Incorrect credentials");
-    return jwtUtil.generateToken(user.getUsername());
+    return jwtUtil.generateToken(user.getId());
   }
 
   public String register(@Valid RegisterUserRequest request) {
     User user = userService.save(request);
-    return jwtUtil.generateToken(user.getUsername());
+    return jwtUtil.generateToken(user.getId());
   }
 }
