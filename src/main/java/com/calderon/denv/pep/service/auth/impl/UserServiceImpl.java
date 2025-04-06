@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     return userRepository.save(
         User.builder()
             .person(person)
-            .username(request.getEmail())
+            .username(request.getDocumentNumber())
             .password(encoder.encode(request.getPassword()))
             .role(Role.ROLE_USER)
             .build());
