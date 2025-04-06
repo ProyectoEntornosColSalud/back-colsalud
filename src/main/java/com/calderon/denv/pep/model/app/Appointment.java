@@ -31,5 +31,4 @@ public class Appointment {
 
   @Column(name = "start_time", nullable = false)
   private LocalDateTime startTime;
-
 }

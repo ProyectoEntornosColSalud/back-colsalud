@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     return userRepository.save(
         User.builder()
             .person(person)
-            .username(request.getEmail())
+            .username(request.getDocumentNumber())
             .password(encoder.encode(request.getPassword()))
             .role(Role.ROLE_USER)
             .build());
@@ -61,12 +61,12 @@ public class UserServiceImpl implements UserService {
   private void validateDocument(RegisterUserRequest request) {
     if (personRepository.existsByDocumentTypeAndDocumentNumber(
         request.getDocumentType(), request.getDocumentNumber()))
-      throw new ValidationException("Error: Document is already in use");
+      throw new ValidationException("Document is already in use");
   }
 
   private void validateEmail(String email) {
     if (personRepository.existsByEmail(email))
-      throw new ValidationException("Error: Email is already in use");
+      throw new ValidationException("Email is already in use");
   }
 
   @Override
@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public @Nullable User getByUsername(String email) {
-    return userRepository.findByUsername(email).orElse(null);
+  public @Nullable User getByUsername(String document) {
+    return userRepository.findByUsername(document).orElse(null);
   }
 }

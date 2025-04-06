@@ -7,7 +7,9 @@ import com.calderon.denv.pep.dto.app.DateFilter;
 import com.calderon.denv.pep.security.JwtUtil;
 import com.calderon.denv.pep.service.app.AppointmentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,23 @@ public class AppointmentController {
   private final AppointmentService appointmentService;
   private final JwtUtil jwtUtil;
 
+  @PostMapping("/schedule")
+  @Operation(summary = "Schedule an appointment")
+  @Parameter(name = "doctor", description = "Doctor ID")
+  @Parameter(name = "specialty", description = "Specialty ID")
+  @Parameter(
+      name = "date",
+      description = "Date and time of the appointment, format: yyyy-MM-dd'T'HH:mm:ss")
+  public ResponseEntity<Void> schedule(
+      @RequestHeader(AUTH_HEADER) String token,
+      @RequestParam("doctor") @Min(1) Long doctorId,
+      @RequestParam("specialty") @Min(1) Long specialtyId,
+      @RequestParam("date") LocalDateTime date) {
+    Long userId = jwtUtil.extractUserId(token);
+    appointmentService.schedule(userId, doctorId, specialtyId, date);
+    return ResponseEntity.ok().build();
+  }
+
   @GetMapping("/specialties")
   @Operation(summary = "Get list of specialties")
   public ResponseEntity<List<ListItem>> getSpecialties() {
@@ -37,7 +56,7 @@ public class AppointmentController {
   @GetMapping("/doctors")
   @Operation(summary = "Get doctors by specialty")
   public ResponseEntity<List<ListItem>> getDoctors(
-      @RequestParam("specialty") Long specialtyId) {
+      @RequestParam("specialty") @Min(1) Long specialtyId) {
     return ResponseEntity.ok(appointmentService.getDoctorsBySpecialty(specialtyId));
   }
 
@@ -45,7 +64,7 @@ public class AppointmentController {
   @Operation(summary = "Get list of available dates for appointment booking")
   public ResponseEntity<Map<String, List<LocalDateTime>>> getDoctorAvailableDates(
       @RequestHeader(AUTH_HEADER) String token,
-      @RequestParam("doctor") Long doctorId,
+      @RequestParam("doctor") @Min(1) Long doctorId,
       @RequestParam(value = "day", required = false) String day,
       @RequestParam(value = "start", required = false) Integer start,
       @RequestParam(value = "end", required = false) Integer end) {

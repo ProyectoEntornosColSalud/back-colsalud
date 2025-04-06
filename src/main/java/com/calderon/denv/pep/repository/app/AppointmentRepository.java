@@ -17,4 +17,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
   @Query(
       "select a.startTime from Appointment a where a.person.id = :personId and a.startTime >= current_timestamp")
   List<LocalDateTime> getPatientAppointments(@NonNull Long personId);
+
+  boolean existsByDoctorIdAndStartTime(Long doctorId, LocalDateTime startTime);
 }

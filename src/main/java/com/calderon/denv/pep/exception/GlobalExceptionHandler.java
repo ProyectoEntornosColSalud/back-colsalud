@@ -1,10 +1,12 @@
 package com.calderon.denv.pep.exception;
 
+import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-
-import io.swagger.v3.oas.annotations.Hidden;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -54,12 +56,33 @@ public class GlobalExceptionHandler {
     InputDataError inputDataError =
         InputDataError.builder()
             .timestamp(LocalDateTime.now())
-            .message("Error: Input data validation failed")
+            .message("Input data validation failed")
             .details(request.getDescription(false))
             .errors(errors)
             .build();
 
     return new ResponseEntity<>(inputDataError, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<InputDataError> handleConstraintViolation(ConstraintViolationException ex) {
+    Map<String, String> errors =
+        ex.getConstraintViolations().stream()
+            .collect(
+                Collectors.toMap(
+                    v -> v.getPropertyPath().toString(),
+                    ConstraintViolation::getMessage,
+                    (msg1, msg2) -> msg1));
+
+    InputDataError error =
+        InputDataError.builder()
+            .timestamp(LocalDateTime.now())
+            .message("Validation failed")
+            .details("Invalid input parameters")
+            .errors(errors)
+            .build();
+
+    return ResponseEntity.badRequest().body(error);
   }
 
   @ExceptionHandler(BadRequestException.class)

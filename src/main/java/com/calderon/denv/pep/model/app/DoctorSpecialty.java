@@ -11,15 +11,15 @@ import lombok.*;
 @Entity
 @Table(name = "doctor_specialty", schema = "app")
 public class DoctorSpecialty {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @EmbeddedId private DoctorSpecialtyId id;
 
   @ManyToOne
+  @MapsId("doctorId")
   @JoinColumn(name = "doctor_id")
   private Doctor doctor;
 
   @ManyToOne
+  @MapsId("specialtyId")
   @JoinColumn(name = "specialty_id")
   private Specialty specialty;
 }

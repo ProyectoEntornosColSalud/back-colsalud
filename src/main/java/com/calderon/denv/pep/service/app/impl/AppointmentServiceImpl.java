@@ -7,11 +7,14 @@ import static java.util.Objects.requireNonNull;
 
 import com.calderon.denv.pep.dto.ListItem;
 import com.calderon.denv.pep.dto.app.DateFilter;
+import com.calderon.denv.pep.exception.BadRequestException;
+import com.calderon.denv.pep.exception.ValidationException;
 import com.calderon.denv.pep.model.app.Appointment;
 import com.calderon.denv.pep.model.app.Doctor;
 import com.calderon.denv.pep.model.app.Person;
 import com.calderon.denv.pep.model.app.Specialty;
 import com.calderon.denv.pep.model.auth.User;
+import com.calderon.denv.pep.repository.DoctorSpecialtyRepository;
 import com.calderon.denv.pep.repository.app.AppointmentRepository;
 import com.calderon.denv.pep.repository.app.DoctorRepository;
 import com.calderon.denv.pep.repository.app.SpecialtyRepository;
@@ -36,9 +39,7 @@ public class AppointmentServiceImpl implements AppointmentService {
   private final AppointmentRepository appointmentRepository;
   private final UserService userService;
   private final SpecialtyRepository specialtyRepository;
-
-  @Override
-  public void schedule(Appointment appointment) {}
+  private final DoctorSpecialtyRepository doctorSpecialtyRepository;
 
   @Override
   public List<ListItem> getSpecialties() {
@@ -144,8 +145,27 @@ public class AppointmentServiceImpl implements AppointmentService {
   }
 
   @Override
-  public List<Object> filterDates(
-      Long specialtyId, Long doctorId, LocalDate day, Integer start, Integer end) {
-    return List.of();
+  public void schedule(Long userId, Long doctorId, Long specialtyId, LocalDateTime date) {
+    User user = requireNonNull(userService.getUserById(userId));
+    date = date.truncatedTo(ChronoUnit.HOURS);
+
+    if (date.isBefore(LocalDateTime.now()) || !isWorkTime(date.getHour())) {
+      throw new BadRequestException("Date is not valid");
+    }
+
+    if (!doctorSpecialtyRepository.existsByDoctorIdAndSpecialtyId(doctorId, specialtyId)) {
+      throw new ValidationException("Doctor does not have the selected specialty");
+    }
+
+    if (appointmentRepository.existsByDoctorIdAndStartTime(doctorId, date))
+      throw new ValidationException("Date is already booked");
+
+    appointmentRepository.save(
+        Appointment.builder()
+            .doctor(new Doctor(doctorId))
+            .person(user.getPerson())
+            .specialty(new Specialty(specialtyId))
+            .startTime(date)
+            .build());
   }
 }

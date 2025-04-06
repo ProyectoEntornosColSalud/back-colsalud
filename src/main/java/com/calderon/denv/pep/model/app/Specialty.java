@@ -24,4 +24,8 @@ public class Specialty {
 
   @Column(name = "active", nullable = false)
   private Boolean active;
+
+  public Specialty(Long id) {
+    this.id = id;
+  }
 }
