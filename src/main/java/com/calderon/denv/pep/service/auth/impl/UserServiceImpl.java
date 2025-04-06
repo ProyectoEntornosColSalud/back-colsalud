@@ -61,12 +61,12 @@ public class UserServiceImpl implements UserService {
   private void validateDocument(RegisterUserRequest request) {
     if (personRepository.existsByDocumentTypeAndDocumentNumber(
         request.getDocumentType(), request.getDocumentNumber()))
-      throw new ValidationException("Error: Document is already in use");
+      throw new ValidationException("Document is already in use");
   }
 
   private void validateEmail(String email) {
     if (personRepository.existsByEmail(email))
-      throw new ValidationException("Error: Email is already in use");
+      throw new ValidationException("Email is already in use");
   }
 
   @Override

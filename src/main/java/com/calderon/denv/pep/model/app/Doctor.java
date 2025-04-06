@@ -22,4 +22,8 @@ public class Doctor {
 
   @Column(name = "license_number", nullable = false, length = 20)
   private String licenseNumber;
+
+  public Doctor(Long id) {
+    this.id = id;
+  }
 }

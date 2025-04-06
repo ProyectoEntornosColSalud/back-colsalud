@@ -22,7 +22,7 @@ public class AuthenticationService {
   public String login(String username, String password) {
     User user = userService.getByUsername(username);
     if (isNull(user) || !encoder.matches(password, user.getPassword()))
-      throw new BadCredentialsException("Error: Incorrect credentials");
+      throw new BadCredentialsException("Incorrect credentials");
     return jwtUtil.generateToken(user.getId());
   }
 
