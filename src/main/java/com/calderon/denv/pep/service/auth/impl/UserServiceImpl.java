@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.calderon.denv.pep.constant.Role;
 import com.calderon.denv.pep.dto.app.RegisterUserRequest;
+import com.calderon.denv.pep.dto.app.UpdateUserRequest;
 import com.calderon.denv.pep.exception.ValidationException;
 import com.calderon.denv.pep.model.app.Person;
 import com.calderon.denv.pep.model.auth.User;
@@ -85,5 +86,24 @@ public class UserServiceImpl implements UserService {
   @Override
   public @Nullable User getByUsername(String document) {
     return userRepository.findByUsername(document).orElse(null);
+  }
+
+  @Override
+  public void update(Long userId, UpdateUserRequest request) {
+    User user = requireNonNull(getUserById(userId));
+    Person person = user.getPerson();
+    if (!request.getEmail().equalsIgnoreCase(person.getEmail())) validateEmail(request.getEmail());
+    updatePersonInfo(request, person);
+  }
+
+  private void updatePersonInfo(UpdateUserRequest request, Person person) {
+    person.setName(request.getName());
+    person.setLastname(request.getLastName());
+    person.setGender(request.getGender());
+    person.setBirthday(request.getBirthDate());
+    person.setPhone(request.getPhone());
+    person.setEmail(request.getEmail());
+    person.setDocumentType(request.getDocumentType());
+    personRepository.save(person);
   }
 }
