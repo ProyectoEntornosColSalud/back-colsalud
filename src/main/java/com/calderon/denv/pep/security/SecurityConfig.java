@@ -50,7 +50,8 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http, JwtRequestFilter jwtRequestFilter) throws Exception {
-    http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+    http
+      .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -58,7 +59,6 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers(
                         "/api/auth/**",
-                        "/api/user/register",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/bus/v3/api-docs/**")
@@ -72,7 +72,8 @@ public class SecurityConfig {
   private CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
     config.setAllowCredentials(true);
-    config.setAllowedOrigins(List.of("http://127.0.0.1:5500"));
+    config.setAllowedOrigins(List.of("http://127.0.0.1:5500", "http://localhost:5173"));
+    config.addAllowedOriginPattern("*");
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
     config.setExposedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
