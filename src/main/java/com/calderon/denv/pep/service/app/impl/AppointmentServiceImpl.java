@@ -2,6 +2,7 @@ package com.calderon.denv.pep.service.app.impl;
 
 import static com.calderon.denv.pep.constant.Constant.END_WORK_HOUR;
 import static com.calderon.denv.pep.constant.Constant.START_WORK_HOUR;
+import static com.calderon.denv.pep.util.Tools.getColTime;
 import static com.calderon.denv.pep.util.Tools.parseDate;
 import static java.util.Objects.requireNonNull;
 
@@ -23,10 +24,7 @@ import com.calderon.denv.pep.service.auth.UserService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -78,15 +76,15 @@ public class AppointmentServiceImpl implements AppointmentService {
   }
 
   private static LocalDate getValidFilterDay(String day) {
-    LocalDate today = LocalDate.now();
+    LocalDate today = getColTime().toLocalDate();
     return parseDate(day).filter(d -> !d.isBefore(today)).orElse(today);
   }
 
   private static int getValidStartHour(Integer startHour, LocalDate day) {
     boolean isValidWorkHour = isWorkTime(startHour);
 
-    if (day.isEqual(LocalDate.now())) {
-      int nextHour = LocalDateTime.now().getHour() + 1;
+    if (day.isEqual(getColTime().toLocalDate())) {
+      int nextHour = getColTime().getHour() + 1;
       return isValidWorkHour && startHour > nextHour ? startHour : nextHour;
     }
 
@@ -149,7 +147,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     User user = requireNonNull(userService.getUserById(userId));
     date = date.truncatedTo(ChronoUnit.HOURS);
 
-    if (date.isBefore(LocalDateTime.now()) || !isWorkTime(date.getHour())) {
+    if (date.isBefore(getColTime()) || !isWorkTime(date.getHour())) {
       throw new BadRequestException("Date is not valid");
     }
 

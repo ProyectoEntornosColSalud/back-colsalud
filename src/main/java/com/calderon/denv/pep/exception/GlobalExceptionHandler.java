@@ -1,9 +1,10 @@
 package com.calderon.denv.pep.exception;
 
+import static com.calderon.denv.pep.util.Tools.getColTime;
+
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,7 +23,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorDetails> handleGlobalException(Exception ex, WebRequest request) {
     ErrorDetails errorDetails =
         ErrorDetails.builder()
-            .timestamp(LocalDateTime.now())
+            .timestamp(getColTime())
             .message(ex.getMessage())
             .details(request.getDescription(false))
             .build();
@@ -33,7 +34,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorDetails> handleResourceNotFoundException(
       DataNotFoundException ex, WebRequest request) {
     ErrorDetails errorDetails =
-        new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        new ErrorDetails(getColTime(), ex.getMessage(), request.getDescription(false));
     return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
   }
 
@@ -41,7 +42,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorDetails> handleBadCredentialsException(
       BadCredentialsException ex, WebRequest request) {
     ErrorDetails errorDetails =
-        new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        new ErrorDetails(getColTime(), ex.getMessage(), request.getDescription(false));
     return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
   }
 
@@ -55,7 +56,7 @@ public class GlobalExceptionHandler {
 
     InputDataError inputDataError =
         InputDataError.builder()
-            .timestamp(LocalDateTime.now())
+            .timestamp(getColTime())
             .message("Input data validation failed")
             .details(request.getDescription(false))
             .errors(errors)
@@ -76,7 +77,7 @@ public class GlobalExceptionHandler {
 
     InputDataError error =
         InputDataError.builder()
-            .timestamp(LocalDateTime.now())
+            .timestamp(getColTime())
             .message("Validation failed")
             .details("Invalid input parameters")
             .errors(errors)
@@ -89,7 +90,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorDetails> handleBadRequestException(
       BadRequestException ex, WebRequest request) {
     ErrorDetails errorDetails =
-        new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        new ErrorDetails(getColTime(), ex.getMessage(), request.getDescription(false));
     return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
   }
 }

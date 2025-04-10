@@ -3,6 +3,8 @@ package com.calderon.denv.pep.util;
 import static com.calderon.denv.pep.constant.Constant.YYYY_MM_DD_REGEX;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -18,6 +20,10 @@ public class Tools {
       throw new IllegalArgumentException(
           String.format("Cannot parse date %s, expected pattern yyyy-MM-dd", date));
     return Optional.of(LocalDate.parse(matcher.group(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+  }
+
+  public static LocalDateTime getColTime() {
+    return LocalDateTime.now(ZoneId.of("America/Bogota"));
   }
 
   private Tools() {}
