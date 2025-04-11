@@ -1,10 +1,11 @@
 package com.calderon.denv.pep.security;
 
-import static com.calderon.denv.pep.constant.Constant.TOKEN_EXPIRATION_TIME;
+import static com.calderon.denv.pep.constant.Constant.TOKEN_MINUTES_EXPIRATION_TIME;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
@@ -23,10 +24,13 @@ public class JwtUtil {
 
   /** Generates a JWT token with the userId as the subject */
   public String generateToken(Long userId) {
+    ZoneId zoneId = ZoneId.of("America/Bogota");
     return Jwts.builder()
         .subject(String.valueOf(userId))
-        .issuedAt(new Date())
-        .expiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
+        .issuedAt(Date.from(java.time.ZonedDateTime.now(zoneId).toInstant()))
+        .expiration(
+            Date.from(
+                java.time.ZonedDateTime.now(zoneId).plusMinutes(TOKEN_MINUTES_EXPIRATION_TIME).toInstant()))
         .signWith(getSigningKey())
         .compact();
   }
