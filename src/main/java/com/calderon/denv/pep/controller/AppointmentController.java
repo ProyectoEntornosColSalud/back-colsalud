@@ -2,7 +2,9 @@ package com.calderon.denv.pep.controller;
 
 import static com.calderon.denv.pep.constant.Constant.AUTH_HEADER;
 
+import com.calderon.denv.pep.constant.AppointmentStatus;
 import com.calderon.denv.pep.dto.ListItem;
+import com.calderon.denv.pep.dto.app.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.DateFilter;
 import com.calderon.denv.pep.security.JwtUtil;
 import com.calderon.denv.pep.service.app.AppointmentService;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -73,5 +76,41 @@ public class AppointmentController {
         appointmentService.getDoctorAvailableDates(
             userId, new DateFilter(doctorId, day, start, end));
     return ResponseEntity.ok(Map.of("available", response));
+  }
+
+  @GetMapping()
+  @Operation(summary = "Get user appointments")
+  public ResponseEntity<List<AppointmentResponse>> getUserAppointments(
+      @RequestHeader(AUTH_HEADER) String token) {
+    Long userId = jwtUtil.extractUserId(token);
+    List<AppointmentResponse> appointments = appointmentService.getUserAppointments(userId);
+    Map<AppointmentStatus, Integer> statusOrder =
+        Map.of(
+            AppointmentStatus.PENDIENTE,
+            1,
+            AppointmentStatus.PERDIDA,
+            2,
+            AppointmentStatus.ASISTIDA,
+            3,
+            AppointmentStatus.CANCELADA,
+            4);
+    List<AppointmentResponse> sorted =
+        appointments.stream()
+            .sorted(
+                Comparator.comparing(
+                        (AppointmentResponse a) -> statusOrder.getOrDefault(a.getStatus(), 99))
+                    .thenComparing(AppointmentResponse::getTime))
+            .toList();
+    return ResponseEntity.ok(sorted);
+  }
+
+  @PutMapping("/cancel")
+  public ResponseEntity<Void> cancelAppointment(
+      @RequestHeader(AUTH_HEADER) String token,
+      @RequestParam("appointment") @Min(1) Long appointmentId) {
+
+    Long userId = jwtUtil.extractUserId(token);
+    appointmentService.cancelAppointment(userId, appointmentId);
+    return ResponseEntity.ok().build();
   }
 }

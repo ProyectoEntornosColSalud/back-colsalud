@@ -1,5 +1,6 @@
 package com.calderon.denv.pep.model.app;
 
+import com.calderon.denv.pep.constant.AppointmentStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
@@ -31,4 +32,7 @@ public class Appointment {
 
   @Column(name = "start_time", nullable = false)
   private LocalDateTime startTime;
+
+	@Enumerated(EnumType.STRING)
+	private AppointmentStatus status;
 }

@@ -6,7 +6,9 @@ import static com.calderon.denv.pep.util.Tools.getColTime;
 import static com.calderon.denv.pep.util.Tools.parseDate;
 import static java.util.Objects.requireNonNull;
 
+import com.calderon.denv.pep.constant.AppointmentStatus;
 import com.calderon.denv.pep.dto.ListItem;
+import com.calderon.denv.pep.dto.app.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.DateFilter;
 import com.calderon.denv.pep.exception.BadRequestException;
 import com.calderon.denv.pep.exception.ValidationException;
@@ -65,19 +67,24 @@ public class AppointmentServiceImpl implements AppointmentService {
 
   @Override
   public List<LocalDateTime> getDoctorAvailableDates(Long userId, DateFilter filter) {
-    LocalDate filterDate = getValidFilterDay(filter.getDay());
-    int startHour = getValidStartHour(filter.getStartTime(), filterDate);
+    FilterDayResult filterDayResult = getValidFilterDay(filter.getDay());
+    int startHour = getValidStartHour(filter.getStartTime(), filterDayResult.date);
     int endHour = getValidEndHour(filter.getEndTime(), startHour);
 
-    LocalDateTime startDate = filterDate.atTime(startHour, 0);
-    LocalDateTime endDate = filterDate.atTime(endHour, 0);
+    LocalDateTime startDate = filterDayResult.date.atTime(startHour, 0);
+    LocalDateTime endDate =
+        filterDayResult.usingGivenDate
+            ? filterDayResult.date.atTime(endHour, 0)
+            : filterDayResult.date.plusYears(2).atTime(END_WORK_HOUR, 0);
 
     return getAvailableAppointments(filter.getDoctorId(), userId, startDate, endDate, 12);
   }
 
-  private static LocalDate getValidFilterDay(String day) {
+  private static FilterDayResult getValidFilterDay(String day) {
     LocalDate today = getColTime().toLocalDate();
-    return parseDate(day).filter(d -> !d.isBefore(today)).orElse(today);
+    LocalDate givenDate = parseDate(day).orElse(null);
+    boolean usingGivenDate = givenDate != null && !givenDate.isBefore(today);
+    return new FilterDayResult(usingGivenDate ? givenDate : today, usingGivenDate);
   }
 
   private static int getValidStartHour(Integer startHour, LocalDate day) {
@@ -130,14 +137,16 @@ public class AppointmentServiceImpl implements AppointmentService {
   }
 
   private Set<LocalDateTime> getDoctorAppointments(Long doctorId) {
-    return appointmentRepository.getFutureAppointments(doctorId).stream()
+    return appointmentRepository.getFutureAppointments(doctorId, getColTime()).stream()
         .map(date -> date.truncatedTo(ChronoUnit.HOURS))
         .collect(Collectors.toSet());
   }
 
   private HashSet<LocalDateTime> getPatientAppointments(Long userID) {
     User user = requireNonNull(userService.getUserById(userID));
-    return appointmentRepository.getPatientAppointments(user.getPerson().getId()).stream()
+    return appointmentRepository
+        .getFuturePatientAppointmentsTimes(user.getPerson().getId(), getColTime())
+        .stream()
         .map(date -> date.truncatedTo(ChronoUnit.HOURS))
         .collect(Collectors.toCollection(HashSet::new));
   }
@@ -155,7 +164,7 @@ public class AppointmentServiceImpl implements AppointmentService {
       throw new ValidationException("Doctor does not have the selected specialty");
     }
 
-    if (appointmentRepository.existsByDoctorIdAndStartTime(doctorId, date))
+    if (appointmentRepository.existsByDoctorIdAndStartTimeAndStatus(doctorId, date, AppointmentStatus.PENDIENTE))
       throw new ValidationException("Date is already booked");
 
     appointmentRepository.save(
@@ -164,6 +173,36 @@ public class AppointmentServiceImpl implements AppointmentService {
             .person(user.getPerson())
             .specialty(new Specialty(specialtyId))
             .startTime(date)
+            .status(AppointmentStatus.PENDIENTE)
             .build());
   }
+
+  @Override
+  public List<AppointmentResponse> getUserAppointments(Long userId) {
+    User user = requireNonNull(userService.getUserById(userId));
+    return appointmentRepository.getPatientAppointments(user.getPerson().getId()).stream()
+        .map(
+            ap ->
+                AppointmentResponse.builder()
+                    .appointmentId(ap.getId())
+                    .specialtyName(ap.getSpecialty().getName())
+                    .doctorName(formatPersonName(ap.getDoctor().getPerson()))
+                    .time(ap.getStartTime())
+                    .status(ap.getStatus())
+                    .build())
+        .toList();
+  }
+
+  @Override
+  public void cancelAppointment(Long userId, Long appointmentId) {
+    Person person = requireNonNull(userService.getUserById(userId)).getPerson();
+    Appointment ap =
+        appointmentRepository
+            .findByIdAndPersonId(appointmentId, person.getId())
+            .orElseThrow(() -> new BadRequestException("Appointment not found"));
+    ap.setStatus(AppointmentStatus.CANCELADA);
+    appointmentRepository.save(ap);
+  }
+
+  record FilterDayResult(LocalDate date, boolean usingGivenDate) {}
 }
