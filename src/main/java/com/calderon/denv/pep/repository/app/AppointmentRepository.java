@@ -31,9 +31,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
   Optional<Appointment> findByIdAndPersonId(Long id, Long personId);
 
-  @Query("select a from Appointment  a where a.status = 'PENDIENTE' and a.startTime < :now")
-  List<Appointment> findPendingPastAppointments(LocalDateTime now);
-
   @Modifying
   @Query(
       "update Appointment a set a.status = 'PERDIDA' where a.status = 'PENDIENTE' and a.startTime < :now")

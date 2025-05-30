@@ -7,7 +7,6 @@ import com.calderon.denv.pep.dto.app.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.DateFilter;
 import com.calderon.denv.pep.dto.app.SpecialtyDTO;
 import com.calderon.denv.pep.model.app.Appointment;
-import com.calderon.denv.pep.repository.app.PersonRepository;
 import com.calderon.denv.pep.repository.auth.UserRepository;
 import com.calderon.denv.pep.security.JwtUtil;
 import com.calderon.denv.pep.service.app.AppointmentService;
@@ -37,7 +36,6 @@ public class AppointmentController {
 
   private final AppointmentService appointmentService;
   private final JwtUtil jwtUtil;
-  private final PersonRepository personRepository;
   private final UserRepository userRepository;
 
   @PostMapping("/schedule")
@@ -46,7 +44,7 @@ public class AppointmentController {
   @Parameter(name = "specialty", description = "Specialty ID")
   @Parameter(
       name = "date",
-      description = "Date and time of the appointment, format: yyyy-MM-dd'T'HH:mm:ss")
+      description = "Date and time of the appointment, format: yyyy-MM-ddTHH:mm:ss")
   public ResponseEntity<Void> schedule(
       @RequestHeader(AUTH_HEADER) String token,
       @RequestParam("doctor") @Min(1) Long doctorId,

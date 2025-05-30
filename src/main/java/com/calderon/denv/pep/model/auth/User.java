@@ -1,7 +1,6 @@
 package com.calderon.denv.pep.model.auth;
 
 import com.calderon.denv.pep.constant.Role;
-import com.calderon.denv.pep.model.app.Person;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;

@@ -5,7 +5,6 @@ import static com.calderon.denv.pep.constant.Constant.AUTH_HEADER;
 import com.calderon.denv.pep.dto.app.PersonResponse;
 import com.calderon.denv.pep.dto.app.UpdateUserRequest;
 import com.calderon.denv.pep.model.app.Person;
-import com.calderon.denv.pep.model.auth.User;
 import com.calderon.denv.pep.repository.app.PersonRepository;
 import com.calderon.denv.pep.security.JwtUtil;
 import com.calderon.denv.pep.service.auth.UserService;
