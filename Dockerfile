@@ -1,5 +1,4 @@
 FROM eclipse-temurin:21-jdk-alpine AS builder
-ARG MS_NAME=fpc-backend
 WORKDIR /app
 
 COPY ./pom.xml ./mvnw ./mvnw.cmd /app/
