@@ -4,7 +4,9 @@ import static com.calderon.denv.pep.constant.Constant.AUTH_HEADER;
 
 import com.calderon.denv.pep.dto.app.PersonResponse;
 import com.calderon.denv.pep.dto.app.UpdateUserRequest;
+import com.calderon.denv.pep.model.app.Person;
 import com.calderon.denv.pep.model.auth.User;
+import com.calderon.denv.pep.repository.app.PersonRepository;
 import com.calderon.denv.pep.security.JwtUtil;
 import com.calderon.denv.pep.service.auth.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
   private final UserService userService;
   private final JwtUtil jwtUtil;
+  private final PersonRepository personRepository;
 
   @PutMapping
   @Operation(summary = "Update person information")
@@ -35,11 +38,11 @@ public class UserController {
   @Operation(summary = "Get person information")
   public ResponseEntity<PersonResponse> get(@RequestHeader(AUTH_HEADER) String token) {
     Long userId = jwtUtil.extractUserId(token);
-    User user = userService.getUserById(userId);
-    if (user == null) {
+    Person person = personRepository.getByUserId(userId).orElse(null);
+    if (person == null) {
       return ResponseEntity.notFound().build();
     }
 
-    return ResponseEntity.ok(PersonResponse.from(user.getPerson()));
+    return ResponseEntity.ok(PersonResponse.from(person));
   }
 }

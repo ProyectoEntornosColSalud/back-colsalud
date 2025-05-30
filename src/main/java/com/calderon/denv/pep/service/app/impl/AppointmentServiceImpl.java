@@ -7,9 +7,11 @@ import static com.calderon.denv.pep.util.Tools.parseDate;
 import static java.util.Objects.requireNonNull;
 
 import com.calderon.denv.pep.constant.AppointmentStatus;
+import com.calderon.denv.pep.constant.DoctorAppointmentSearchType;
 import com.calderon.denv.pep.dto.ListItem;
 import com.calderon.denv.pep.dto.app.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.DateFilter;
+import com.calderon.denv.pep.dto.app.projection.DoctorAppointment;
 import com.calderon.denv.pep.exception.BadRequestException;
 import com.calderon.denv.pep.exception.ValidationException;
 import com.calderon.denv.pep.model.app.Appointment;
@@ -21,6 +23,7 @@ import com.calderon.denv.pep.repository.DoctorSpecialtyRepository;
 import com.calderon.denv.pep.repository.app.AppointmentRepository;
 import com.calderon.denv.pep.repository.app.DoctorRepository;
 import com.calderon.denv.pep.repository.app.SpecialtyRepository;
+import com.calderon.denv.pep.repository.auth.UserRepository;
 import com.calderon.denv.pep.service.app.AppointmentService;
 import com.calderon.denv.pep.service.auth.UserService;
 import java.time.LocalDate;
@@ -30,7 +33,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,10 +46,13 @@ public class AppointmentServiceImpl implements AppointmentService {
   private final UserService userService;
   private final SpecialtyRepository specialtyRepository;
   private final DoctorSpecialtyRepository doctorSpecialtyRepository;
+  private final UserRepository userRepository;
+
+  private record FilterDayResult(LocalDate date, boolean usingGivenDate) {}
 
   @Override
-  public List<ListItem> getSpecialties() {
-    return specialtyRepository.findAllActive().stream().map(this::mapSpecialtyResponse).toList();
+  public List<Specialty> getSpecialties() {
+    return specialtyRepository.findAllActive();
   }
 
   @Override
@@ -55,10 +64,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
   private ListItem mapDoctorResponse(Doctor doctor) {
     return new ListItem(doctor.getId(), formatPersonName(doctor.getPerson()));
-  }
-
-  private ListItem mapSpecialtyResponse(Specialty specialty) {
-    return new ListItem(specialty.getId(), specialty.getName());
   }
 
   private static String formatPersonName(Person person) {
@@ -145,7 +150,7 @@ public class AppointmentServiceImpl implements AppointmentService {
   private HashSet<LocalDateTime> getPatientAppointments(Long userID) {
     User user = requireNonNull(userService.getUserById(userID));
     return appointmentRepository
-        .getFuturePatientAppointmentsTimes(user.getPerson().getId(), getColTime())
+        .getFuturePatientAppointmentsTimes(user.getPersonId(), getColTime())
         .stream()
         .map(date -> date.truncatedTo(ChronoUnit.HOURS))
         .collect(Collectors.toCollection(HashSet::new));
@@ -154,33 +159,38 @@ public class AppointmentServiceImpl implements AppointmentService {
   @Override
   public void schedule(Long userId, Long doctorId, Long specialtyId, LocalDateTime date) {
     User user = requireNonNull(userService.getUserById(userId));
-    date = date.truncatedTo(ChronoUnit.HOURS);
-
-    if (date.isBefore(getColTime()) || !isWorkTime(date.getHour())) {
-      throw new BadRequestException("Date is not valid");
-    }
-
+    validateAppointmentDate(date, doctorId, user.getPersonId());
     if (!doctorSpecialtyRepository.existsByDoctorIdAndSpecialtyId(doctorId, specialtyId)) {
       throw new ValidationException("Doctor does not have the selected specialty");
     }
 
-    if (appointmentRepository.existsByDoctorIdAndStartTimeAndStatus(doctorId, date, AppointmentStatus.PENDIENTE))
-      throw new ValidationException("Date is already booked");
-
     appointmentRepository.save(
         Appointment.builder()
             .doctor(new Doctor(doctorId))
-            .person(user.getPerson())
+            .personId(user.getPersonId())
             .specialty(new Specialty(specialtyId))
             .startTime(date)
             .status(AppointmentStatus.PENDIENTE)
             .build());
   }
 
+  private void validateAppointmentDate(LocalDateTime date, Long doctorId, Long personId) {
+    LocalDateTime truncated = date.truncatedTo(ChronoUnit.HOURS);
+    if (truncated.isBefore(getColTime()) || !isWorkTime(truncated.getHour()))
+      throw new BadRequestException("Date is not valid");
+
+    if (appointmentRepository.existsByDoctorIdAndStartTimeAndStatus(
+        doctorId, truncated, AppointmentStatus.PENDIENTE))
+      throw new ValidationException("Date is already booked");
+
+    if (appointmentRepository.existsByPersonIdAndStartTime(personId, date))
+      throw new ValidationException("You already have an appointment at this time");
+  }
+
   @Override
   public List<AppointmentResponse> getUserAppointments(Long userId) {
     User user = requireNonNull(userService.getUserById(userId));
-    return appointmentRepository.getPatientAppointments(user.getPerson().getId()).stream()
+    return appointmentRepository.getPatientAppointments(user.getPersonId()).stream()
         .map(
             ap ->
                 AppointmentResponse.builder()
@@ -195,14 +205,43 @@ public class AppointmentServiceImpl implements AppointmentService {
 
   @Override
   public void cancelAppointment(Long userId, Long appointmentId) {
-    Person person = requireNonNull(userService.getUserById(userId)).getPerson();
+    Long personId = requireNonNull(userRepository.getPersonIdByUserId(userId));
     Appointment ap =
         appointmentRepository
-            .findByIdAndPersonId(appointmentId, person.getId())
+            .findByIdAndPersonId(appointmentId, personId)
             .orElseThrow(() -> new BadRequestException("Appointment not found"));
     ap.setStatus(AppointmentStatus.CANCELADA);
     appointmentRepository.save(ap);
   }
 
-  record FilterDayResult(LocalDate date, boolean usingGivenDate) {}
+  @Override
+  @Transactional
+  public void updateMissedAppointments() {
+    appointmentRepository.updateMissedAppointments(getColTime());
+  }
+
+  @Override
+  public Appointment get(Long appointmentId) {
+    return this.appointmentRepository.findById(appointmentId).orElseThrow();
+  }
+
+  @Override
+  public void reschedule(Appointment appointment, LocalDateTime newDate) {
+    validateAppointmentDate(newDate, appointment.getDoctor().getId(), appointment.getPersonId());
+  }
+
+  @Override
+  public Page<DoctorAppointment> getAppointmentsByDoctor(
+      Doctor doctor, DoctorAppointmentSearchType searchType, Pageable pageable) {
+    return switch (searchType) {
+      case PENDING -> appointmentRepository.getPendingApptsForDoctor(doctor.getId(), pageable);
+      case PAST -> appointmentRepository.getPastApptsForDoctor(doctor.getId(), pageable);
+    };
+  }
+
+  @Override
+  public void markAsAttended(Appointment appointment) {
+    appointment.setStatus(AppointmentStatus.ASISTIDA);
+    appointmentRepository.save(appointment);
+  }
 }

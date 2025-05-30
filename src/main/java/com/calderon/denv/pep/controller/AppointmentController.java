@@ -2,10 +2,13 @@ package com.calderon.denv.pep.controller;
 
 import static com.calderon.denv.pep.constant.Constant.AUTH_HEADER;
 
-import com.calderon.denv.pep.constant.AppointmentStatus;
 import com.calderon.denv.pep.dto.ListItem;
 import com.calderon.denv.pep.dto.app.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.DateFilter;
+import com.calderon.denv.pep.dto.app.SpecialtyDTO;
+import com.calderon.denv.pep.model.app.Appointment;
+import com.calderon.denv.pep.repository.app.PersonRepository;
+import com.calderon.denv.pep.repository.auth.UserRepository;
 import com.calderon.denv.pep.security.JwtUtil;
 import com.calderon.denv.pep.service.app.AppointmentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,8 +19,10 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +37,8 @@ public class AppointmentController {
 
   private final AppointmentService appointmentService;
   private final JwtUtil jwtUtil;
+  private final PersonRepository personRepository;
+  private final UserRepository userRepository;
 
   @PostMapping("/schedule")
   @Operation(summary = "Schedule an appointment")
@@ -50,10 +57,24 @@ public class AppointmentController {
     return ResponseEntity.ok().build();
   }
 
+  @PutMapping("/{appointmentId}/reschedule")
+  public ResponseEntity<Void> reschedule(
+      @RequestHeader(AUTH_HEADER) String token,
+      @PathVariable Long appointmentId,
+      LocalDateTime newDate) {
+    Long patientId = userRepository.getPersonIdByUserId(jwtUtil.extractUserId(token));
+    Appointment appointment = appointmentService.get(appointmentId);
+    if (!Objects.equals(patientId, appointment.getPersonId()))
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    appointmentService.reschedule(appointment, newDate);
+    return ResponseEntity.ok().build();
+  }
+
   @GetMapping("/specialties")
   @Operation(summary = "Get list of specialties")
-  public ResponseEntity<List<ListItem>> getSpecialties() {
-    return ResponseEntity.ok(appointmentService.getSpecialties());
+  public ResponseEntity<List<SpecialtyDTO>> getSpecialties() {
+    return ResponseEntity.ok(
+        appointmentService.getSpecialties().stream().map(SpecialtyDTO::map).toList());
   }
 
   @GetMapping("/doctors")
@@ -78,27 +99,16 @@ public class AppointmentController {
     return ResponseEntity.ok(Map.of("available", response));
   }
 
-  @GetMapping()
+  @GetMapping
   @Operation(summary = "Get user appointments")
   public ResponseEntity<List<AppointmentResponse>> getUserAppointments(
       @RequestHeader(AUTH_HEADER) String token) {
     Long userId = jwtUtil.extractUserId(token);
     List<AppointmentResponse> appointments = appointmentService.getUserAppointments(userId);
-    Map<AppointmentStatus, Integer> statusOrder =
-        Map.of(
-            AppointmentStatus.PENDIENTE,
-            1,
-            AppointmentStatus.PERDIDA,
-            2,
-            AppointmentStatus.ASISTIDA,
-            3,
-            AppointmentStatus.CANCELADA,
-            4);
     List<AppointmentResponse> sorted =
         appointments.stream()
             .sorted(
-                Comparator.comparing(
-                        (AppointmentResponse a) -> statusOrder.getOrDefault(a.getStatus(), 99))
+                Comparator.comparing((AppointmentResponse a) -> a.getStatus().getOrder())
                     .thenComparing(AppointmentResponse::getTime))
             .toList();
     return ResponseEntity.ok(sorted);
@@ -113,4 +123,5 @@ public class AppointmentController {
     appointmentService.cancelAppointment(userId, appointmentId);
     return ResponseEntity.ok().build();
   }
+
 }

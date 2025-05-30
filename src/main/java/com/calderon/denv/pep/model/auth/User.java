@@ -12,16 +12,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "user", schema = "app")
+@Table(name = "users", schema = "app")
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_id")
   private Long id;
 
-  @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "id_person")
-  private Person person;
+  @Column(name = "id_person")
+  private Long personId;
 
   @NotBlank
   @Column(nullable = false, unique = true, length = 100)

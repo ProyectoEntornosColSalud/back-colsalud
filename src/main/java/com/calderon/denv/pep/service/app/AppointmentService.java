@@ -1,9 +1,17 @@
 package com.calderon.denv.pep.service.app;
 
+import com.calderon.denv.pep.constant.DoctorAppointmentSearchType;
 import com.calderon.denv.pep.dto.ListItem;
 import com.calderon.denv.pep.dto.app.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.DateFilter;
+import com.calderon.denv.pep.dto.app.projection.DoctorAppointment;
+import com.calderon.denv.pep.model.app.Appointment;
+import com.calderon.denv.pep.model.app.Doctor;
+import com.calderon.denv.pep.model.app.Specialty;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,7 +20,7 @@ public interface AppointmentService {
 
   List<ListItem> getDoctorsBySpecialty(Long specialtyId);
 
-  List<ListItem> getSpecialties();
+  List<Specialty> getSpecialties();
 
   /**
    * Returns a list of available dates for a doctor based on the provided filter. If the filter has
@@ -26,4 +34,13 @@ public interface AppointmentService {
 	List<AppointmentResponse> getUserAppointments(Long userId);
 
   void cancelAppointment(Long userId, @Min(1) Long appointmentId);
+  void updateMissedAppointments();
+
+  Appointment get(Long appointmentId);
+
+  void reschedule(Appointment appointment, LocalDateTime newDate);
+
+  Page<DoctorAppointment> getAppointmentsByDoctor(Doctor doctor, DoctorAppointmentSearchType searchType, Pageable pageable);
+
+  void markAsAttended(Appointment appointment);
 }

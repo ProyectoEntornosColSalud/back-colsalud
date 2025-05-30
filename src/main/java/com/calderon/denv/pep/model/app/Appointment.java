@@ -18,9 +18,8 @@ public class Appointment {
 	@Column(name = "appointment_id")
 	private Long id;
 
-	@ManyToOne
-	@JoinColumn(name = "person_id")
-	private Person person;
+	@Column(name = "person_id")
+	private Long personId;
 
 	@ManyToOne
 	@JoinColumn(name = "doctor_id")
@@ -34,5 +33,6 @@ public class Appointment {
   private LocalDateTime startTime;
 
 	@Enumerated(EnumType.STRING)
+	@Column(name = "status")
 	private AppointmentStatus status;
 }

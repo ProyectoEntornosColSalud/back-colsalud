@@ -16,7 +16,7 @@ public class Doctor {
   @Column(name = "doctor_id")
   private Long id;
 
-  @OneToOne(cascade = CascadeType.ALL)
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   @JoinColumn(name = "person_id")
   private Person person;
 

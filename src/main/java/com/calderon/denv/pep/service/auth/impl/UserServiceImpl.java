@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     Person person = savePersonInfo(request);
     return userRepository.save(
         User.builder()
-            .person(person)
+            .personId(person.getId())
             .username(request.getDocumentNumber())
             .password(encoder.encode(request.getPassword()))
             .role(Role.ROLE_USER)
@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public void update(Long userId, UpdateUserRequest request) {
     User user = requireNonNull(getUserById(userId));
-    Person person = user.getPerson();
+    Person person = personRepository.findById(user.getPersonId()).orElseThrow();
     if (!request.getEmail().equalsIgnoreCase(person.getEmail())) validateEmail(request.getEmail());
     updatePersonInfo(request, person);
   }
