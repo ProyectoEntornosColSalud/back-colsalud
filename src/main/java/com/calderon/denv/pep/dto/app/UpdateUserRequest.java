@@ -2,6 +2,7 @@ package com.calderon.denv.pep.dto.app;
 
 import com.calderon.denv.pep.constant.DocumentType;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import lombok.*;
@@ -12,24 +13,26 @@ import lombok.*;
 @AllArgsConstructor
 public class UpdateUserRequest {
 
-  @NotBlank String name;
+  @NotBlank private String name;
 
   @NotBlank
   @JsonProperty("last_name")
-  String lastName;
+  private String lastName;
 
-  @NotBlank String gender;
+  @NotBlank private String gender;
 
   @NotNull
   @PastOrPresent
   @JsonProperty("birth_date")
-  LocalDate birthDate;
+  private LocalDate birthDate;
 
   @NotNull
   @JsonProperty("doc_type")
-  DocumentType documentType;
+  private DocumentType documentType;
 
-  @Email @NotBlank String email;
+  @Email @NotBlank private String email;
 
-  @NotBlank String phone;
+  @NotBlank private String phone;
+
+  @Nullable private String password;
 }

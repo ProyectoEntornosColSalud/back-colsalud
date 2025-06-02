@@ -26,11 +26,11 @@ public class UserController {
 
   @PutMapping
   @Operation(summary = "Update person information")
-  public ResponseEntity<String> update(
+  public ResponseEntity<Void> update(
     @RequestBody @Validated UpdateUserRequest request, @RequestHeader(AUTH_HEADER) String token) {
     Long userId = jwtUtil.extractUserId(token);
     userService.update(userId, request);
-    return ResponseEntity.ok("You are authenticated");
+    return ResponseEntity.ok().build();
   }
 
   @GetMapping

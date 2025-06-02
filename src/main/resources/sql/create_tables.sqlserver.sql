@@ -175,3 +175,7 @@ UPDATE app.specialty SET description = 'Salud visual y enfermedades de los ojos'
 UPDATE app.specialty SET description = 'Trastornos mentales y emocionales' WHERE specialty_id = 7;
 UPDATE app.specialty SET description = N'Diagnóstico y tratamiento del cáncer'
 WHERE specialty_id = 8;
+
+alter table app.person
+    alter column gender nvarchar(25) null
+go

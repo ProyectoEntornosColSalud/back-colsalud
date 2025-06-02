@@ -1,6 +1,7 @@
 package com.calderon.denv.pep.service.auth.impl;
 
 import static java.util.Objects.requireNonNull;
+import static org.springframework.util.StringUtils.hasText;
 
 import com.calderon.denv.pep.constant.Role;
 import com.calderon.denv.pep.dto.app.RegisterUserRequest;
@@ -62,12 +63,12 @@ public class UserServiceImpl implements UserService {
   private void validateDocument(RegisterUserRequest request) {
     if (personRepository.existsByDocumentTypeAndDocumentNumber(
         request.getDocumentType(), request.getDocumentNumber()))
-      throw new ValidationException("Document is already in use");
+      throw new ValidationException("Este número de documento ya está en uso");
   }
 
   private void validateEmail(String email) {
     if (personRepository.existsByEmail(email))
-      throw new ValidationException("Email is already in use");
+      throw new ValidationException("Este correo electrónico ya está en uso");
   }
 
   @Override
@@ -77,9 +78,8 @@ public class UserServiceImpl implements UserService {
         user.getId().toString(), user.getPassword(), new ArrayList<>());
   }
 
-  @Nullable
   @Override
-  public User getUserById(Long userId) {
+  public @Nullable User getUserById(Long userId) {
     return userRepository.findById(userId).orElse(null);
   }
 
@@ -94,6 +94,7 @@ public class UserServiceImpl implements UserService {
     Person person = personRepository.findById(user.getPersonId()).orElseThrow();
     if (!request.getEmail().equalsIgnoreCase(person.getEmail())) validateEmail(request.getEmail());
     updatePersonInfo(request, person);
+    if (hasText(request.getPassword())) user.setPassword(encoder.encode(request.getPassword()));
   }
 
   private void updatePersonInfo(UpdateUserRequest request, Person person) {

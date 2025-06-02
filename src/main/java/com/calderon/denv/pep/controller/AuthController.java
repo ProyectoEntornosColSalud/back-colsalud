@@ -4,7 +4,6 @@ import com.calderon.denv.pep.dto.app.RegisterUserRequest;
 import com.calderon.denv.pep.dto.auth.LoginRequest;
 import com.calderon.denv.pep.service.auth.impl.AuthenticationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -27,8 +26,7 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public ResponseEntity<Void> register(
-      @RequestBody @Valid RegisterUserRequest request, HttpServletResponse response) {
+  public ResponseEntity<Void> register(@RequestBody @Valid RegisterUserRequest request) {
     String token = authService.register(request);
     return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, token).build();
   }
