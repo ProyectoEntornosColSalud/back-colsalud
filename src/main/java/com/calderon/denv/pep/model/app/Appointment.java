@@ -25,7 +25,7 @@ public class Appointment {
 	@JoinColumn(name = "doctor_id")
 	private Doctor doctor;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "specialty_id")
 	private Specialty specialty;
 

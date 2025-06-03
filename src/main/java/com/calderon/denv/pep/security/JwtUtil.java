@@ -7,6 +7,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Map;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,10 +24,11 @@ public class JwtUtil {
   }
 
   /** Generates a JWT token with the userId as the subject */
-  public String generateToken(Long userId) {
+  public String generateToken(Long userId, boolean isDoctor) {
     ZoneId zoneId = ZoneId.of("America/Bogota");
     return Jwts.builder()
         .subject(String.valueOf(userId))
+        .claims(Map.of("isDoctor", isDoctor))
         .issuedAt(Date.from(java.time.ZonedDateTime.now(zoneId).toInstant()))
         .expiration(
             Date.from(

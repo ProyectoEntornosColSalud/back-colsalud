@@ -3,9 +3,9 @@ package com.calderon.denv.pep.controller;
 import static com.calderon.denv.pep.constant.Constant.AUTH_HEADER;
 
 import com.calderon.denv.pep.dto.ListItem;
-import com.calderon.denv.pep.dto.app.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.DateFilter;
 import com.calderon.denv.pep.dto.app.SpecialtyDTO;
+import com.calderon.denv.pep.dto.app.projection.AppointmentResponse;
 import com.calderon.denv.pep.model.app.Appointment;
 import com.calderon.denv.pep.repository.auth.UserRepository;
 import com.calderon.denv.pep.security.JwtUtil;

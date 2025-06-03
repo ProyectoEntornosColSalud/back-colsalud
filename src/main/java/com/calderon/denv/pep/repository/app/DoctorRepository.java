@@ -13,4 +13,7 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
   @Query("select d from Doctor d join User u on d.person.id = u.personId where u.id = :userId")
   Optional<Doctor> getByUserId(Long userId);
+
+	@Query("select count(d) > 0 from Doctor d join Person p on d.person.id = p.id where p.id = :personId")
+	boolean existsByPersonId(Long personId);
 }

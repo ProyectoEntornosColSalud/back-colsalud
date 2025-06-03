@@ -2,8 +2,8 @@ package com.calderon.denv.pep.service.app;
 
 import com.calderon.denv.pep.constant.DoctorAppointmentSearchType;
 import com.calderon.denv.pep.dto.ListItem;
-import com.calderon.denv.pep.dto.app.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.DateFilter;
+import com.calderon.denv.pep.dto.app.projection.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.projection.DoctorAppointment;
 import com.calderon.denv.pep.model.app.Appointment;
 import com.calderon.denv.pep.model.app.Doctor;

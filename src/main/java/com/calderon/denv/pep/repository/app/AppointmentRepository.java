@@ -1,6 +1,7 @@
 package com.calderon.denv.pep.repository.app;
 
 import com.calderon.denv.pep.constant.AppointmentStatus;
+import com.calderon.denv.pep.dto.app.projection.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.projection.DoctorAppointment;
 import com.calderon.denv.pep.model.app.Appointment;
 import java.time.LocalDateTime;
@@ -23,8 +24,17 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
       "select a.startTime from Appointment a where a.personId = :personId and a.startTime >= :now and a.status = 'PENDIENTE'")
   List<LocalDateTime> getFuturePatientAppointmentsTimes(@NonNull Long personId, LocalDateTime now);
 
-  @Query("select a from Appointment a where a.personId = :personId")
-  List<Appointment> getPatientAppointments(@NonNull Long personId);
+  @Query(
+      """
+      select
+      a.id as appointmentId,
+      concat(a.doctor.person.name , ' ', a.doctor.person.lastname) as doctorName,
+      a.specialty.name as specialtyName,
+      a.startTime as time,
+      a.status as status
+      from Appointment a join User u on a.personId = u.personId where u.id = :userId
+    """)
+  List<AppointmentResponse> getPatientAppointments2(@NonNull Long userId);
 
   boolean existsByDoctorIdAndStartTimeAndStatus(
       Long doctorId, LocalDateTime startTime, AppointmentStatus status);

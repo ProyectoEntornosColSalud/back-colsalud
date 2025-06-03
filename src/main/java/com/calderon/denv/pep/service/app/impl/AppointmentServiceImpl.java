@@ -9,8 +9,8 @@ import static java.util.Objects.requireNonNull;
 import com.calderon.denv.pep.constant.AppointmentStatus;
 import com.calderon.denv.pep.constant.DoctorAppointmentSearchType;
 import com.calderon.denv.pep.dto.ListItem;
-import com.calderon.denv.pep.dto.app.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.DateFilter;
+import com.calderon.denv.pep.dto.app.projection.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.projection.DoctorAppointment;
 import com.calderon.denv.pep.exception.BadRequestException;
 import com.calderon.denv.pep.exception.ValidationException;
@@ -189,18 +189,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 
   @Override
   public List<AppointmentResponse> getUserAppointments(Long userId) {
-    User user = requireNonNull(userService.getUserById(userId));
-    return appointmentRepository.getPatientAppointments(user.getPersonId()).stream()
-        .map(
-            ap ->
-                AppointmentResponse.builder()
-                    .appointmentId(ap.getId())
-                    .specialtyName(ap.getSpecialty().getName())
-                    .doctorName(formatPersonName(ap.getDoctor().getPerson()))
-                    .time(ap.getStartTime())
-                    .status(ap.getStatus())
-                    .build())
-        .toList();
+    //    User user = requireNonNull(userService.getUserById(userId));
+    return appointmentRepository.getPatientAppointments2(userId);
   }
 
   @Override
