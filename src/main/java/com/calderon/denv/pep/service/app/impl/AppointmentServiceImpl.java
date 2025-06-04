@@ -10,6 +10,7 @@ import com.calderon.denv.pep.constant.AppointmentStatus;
 import com.calderon.denv.pep.constant.DoctorAppointmentSearchType;
 import com.calderon.denv.pep.dto.ListItem;
 import com.calderon.denv.pep.dto.app.DateFilter;
+import com.calderon.denv.pep.dto.app.projection.AppointmentDetail;
 import com.calderon.denv.pep.dto.app.projection.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.projection.DoctorAppointment;
 import com.calderon.denv.pep.exception.BadRequestException;
@@ -22,6 +23,7 @@ import com.calderon.denv.pep.model.auth.User;
 import com.calderon.denv.pep.repository.DoctorSpecialtyRepository;
 import com.calderon.denv.pep.repository.app.AppointmentRepository;
 import com.calderon.denv.pep.repository.app.DoctorRepository;
+import com.calderon.denv.pep.repository.app.PersonRepository;
 import com.calderon.denv.pep.repository.app.SpecialtyRepository;
 import com.calderon.denv.pep.repository.auth.UserRepository;
 import com.calderon.denv.pep.service.app.AppointmentService;
@@ -47,6 +49,7 @@ public class AppointmentServiceImpl implements AppointmentService {
   private final SpecialtyRepository specialtyRepository;
   private final DoctorSpecialtyRepository doctorSpecialtyRepository;
   private final UserRepository userRepository;
+  private final PersonRepository personRepository;
 
   private record FilterDayResult(LocalDate date, boolean usingGivenDate) {}
 
@@ -183,7 +186,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         doctorId, truncated, AppointmentStatus.PENDIENTE))
       throw new ValidationException("Date is already booked");
 
-    if (appointmentRepository.existsByPersonIdAndStartTime(personId, date))
+    if (appointmentRepository.existsByPersonIdAndStartTimeAndStatus(
+        personId, date, AppointmentStatus.PENDIENTE))
       throw new ValidationException("You already have an appointment at this time");
   }
 
@@ -224,6 +228,12 @@ public class AppointmentServiceImpl implements AppointmentService {
   public Page<DoctorAppointment> getAppointmentsByDoctor(
       Doctor doctor, DoctorAppointmentSearchType searchType, Pageable pageable) {
     return switch (searchType) {
+      case TODAY ->
+          appointmentRepository.getTodayApptsForDoctor(
+              doctor.getId(),
+              getColTime().toLocalDate().atStartOfDay(),
+              getColTime().toLocalDate().plusDays(1).atStartOfDay(),
+              pageable);
       case PENDING -> appointmentRepository.getPendingApptsForDoctor(doctor.getId(), pageable);
       case PAST -> appointmentRepository.getPastApptsForDoctor(doctor.getId(), pageable);
     };
@@ -233,5 +243,19 @@ public class AppointmentServiceImpl implements AppointmentService {
   public void markAsAttended(Appointment appointment) {
     appointment.setStatus(AppointmentStatus.ASISTIDA);
     appointmentRepository.save(appointment);
+  }
+
+  @Override
+  public AppointmentDetail getAppointmentDetail(Long appointmentId) {
+    Appointment ap = this.get(appointmentId);
+    Person person = personRepository.findById(ap.getPersonId()).orElseThrow();
+    Specialty specialty = ap.getSpecialty();
+    return new AppointmentDetail(
+        ap.getId(),
+        specialty.getName(),
+        ap.getStartTime(),
+        person.getName().concat(" ").concat(person.getLastname()),
+        person.getBirthday(),
+        person.getGender());
   }
 }

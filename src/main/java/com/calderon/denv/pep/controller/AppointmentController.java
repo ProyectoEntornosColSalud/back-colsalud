@@ -5,6 +5,7 @@ import static com.calderon.denv.pep.constant.Constant.AUTH_HEADER;
 import com.calderon.denv.pep.dto.ListItem;
 import com.calderon.denv.pep.dto.app.DateFilter;
 import com.calderon.denv.pep.dto.app.SpecialtyDTO;
+import com.calderon.denv.pep.dto.app.projection.AppointmentDetail;
 import com.calderon.denv.pep.dto.app.projection.AppointmentResponse;
 import com.calderon.denv.pep.model.app.Appointment;
 import com.calderon.denv.pep.repository.auth.UserRepository;
@@ -106,8 +107,8 @@ public class AppointmentController {
     List<AppointmentResponse> sorted =
         appointments.stream()
             .sorted(
-                Comparator.comparing((AppointmentResponse a) -> a.getStatus().getOrder())
-                    .thenComparing(AppointmentResponse::getTime))
+                Comparator.comparing(AppointmentResponse::getTime, Comparator.reverseOrder())
+                    .thenComparing(a-> a.getStatus().getOrder()))
             .toList();
     return ResponseEntity.ok(sorted);
   }
@@ -122,4 +123,10 @@ public class AppointmentController {
     return ResponseEntity.ok().build();
   }
 
+
+  @GetMapping("/{appointmentId}/detail")
+  @Operation(summary = "Get appointment detail")
+  public ResponseEntity<AppointmentDetail> getAppointmentDetail(@PathVariable Long appointmentId) {
+    return ResponseEntity.ok( this.appointmentService.getAppointmentDetail(appointmentId));
+  }
 }

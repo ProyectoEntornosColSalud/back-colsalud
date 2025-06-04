@@ -3,6 +3,7 @@ package com.calderon.denv.pep.service.app;
 import com.calderon.denv.pep.constant.DoctorAppointmentSearchType;
 import com.calderon.denv.pep.dto.ListItem;
 import com.calderon.denv.pep.dto.app.DateFilter;
+import com.calderon.denv.pep.dto.app.projection.AppointmentDetail;
 import com.calderon.denv.pep.dto.app.projection.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.projection.DoctorAppointment;
 import com.calderon.denv.pep.model.app.Appointment;
@@ -41,4 +42,6 @@ public interface AppointmentService {
   Page<DoctorAppointment> getAppointmentsByDoctor(Doctor doctor, DoctorAppointmentSearchType searchType, Pageable pageable);
 
   void markAsAttended(Appointment appointment);
+
+  AppointmentDetail getAppointmentDetail(Long appointmentId);
 }

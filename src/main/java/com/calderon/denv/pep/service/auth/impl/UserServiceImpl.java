@@ -94,7 +94,11 @@ public class UserServiceImpl implements UserService {
     Person person = personRepository.findById(user.getPersonId()).orElseThrow();
     if (!request.getEmail().equalsIgnoreCase(person.getEmail())) validateEmail(request.getEmail());
     updatePersonInfo(request, person);
-    if (hasText(request.getPassword())) user.setPassword(encoder.encode(request.getPassword()));
+    if (hasText(request.getPassword())) {
+      user.setPassword(encoder.encode(request.getPassword()));
+      userRepository.save(user);
+    }
+    ;
   }
 
   private void updatePersonInfo(UpdateUserRequest request, Person person) {

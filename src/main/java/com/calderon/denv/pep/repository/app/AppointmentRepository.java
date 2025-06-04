@@ -4,6 +4,8 @@ import com.calderon.denv.pep.constant.AppointmentStatus;
 import com.calderon.denv.pep.dto.app.projection.AppointmentResponse;
 import com.calderon.denv.pep.dto.app.projection.DoctorAppointment;
 import com.calderon.denv.pep.model.app.Appointment;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +48,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
       "update Appointment a set a.status = 'PERDIDA' where a.status = 'PENDIENTE' and a.startTime < :now")
   void updateMissedAppointments(LocalDateTime now);
 
-  boolean existsByPersonIdAndStartTime(Long personId, LocalDateTime startTime);
+  boolean existsByPersonIdAndStartTimeAndStatus(Long personId, LocalDateTime startTime, AppointmentStatus status);
 
   @Query(
       """
@@ -54,7 +56,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         a.id as appointmentId,
         concat(p.name, ' ', p.lastname) as patientName,
         a.specialty.name as specialtyName,
-        a.startTime as appointmentTime
+        a.startTime as appointmentTime,
+        a.status as status
         from Appointment a
         join Person p on a.personId = p.id
         where a.doctor.id = :id
@@ -68,11 +71,27 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         a.id as appointmentId,
         concat(p.name, ' ', p.lastname) as patientName,
         a.specialty.name as specialtyName,
-        a.startTime as appointmentTime
+        a.startTime as appointmentTime,
+        a.status as status
         from Appointment a
         join Person p on a.personId = p.id
         where a.doctor.id = :id
         and a.status <> 'PENDIENTE'
         """)
   Page<DoctorAppointment> getPastApptsForDoctor(Long id, Pageable pageable);
+
+  @Query(
+      """
+        select
+        a.id as appointmentId,
+        concat(p.name, ' ', p.lastname) as patientName,
+        a.specialty.name as specialtyName,
+        a.startTime as appointmentTime,
+        a.status as status
+        from Appointment a
+        join Person p on a.personId = p.id
+        where a.doctor.id = :id
+        and a.startTime >= :start and a.startTime < :end
+        """)
+  Page<DoctorAppointment> getTodayApptsForDoctor(Long id, LocalDateTime start, LocalDateTime end, Pageable pageable);
 }

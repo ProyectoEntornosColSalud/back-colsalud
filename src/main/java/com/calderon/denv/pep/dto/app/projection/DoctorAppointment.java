@@ -4,15 +4,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 
 public interface DoctorAppointment {
-  @JsonProperty("appointment_id")
+  @JsonProperty("appointmentId")
   Long getAppointmentId();
 
-  @JsonProperty("patient_name")
+  @JsonProperty("patientName")
   String getPatientName();
 
-  @JsonProperty("specialty_name")
+  @JsonProperty("specialtyName")
   String getSpecialtyName();
 
-  @JsonProperty("start_time")
+  @JsonProperty("startTime")
   LocalDateTime getAppointmentTime();
+
+  @JsonProperty("status")
+  String getStatus();
 }
